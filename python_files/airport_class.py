@@ -1,12 +1,5 @@
-""" This module contains one class with the purpose of analyzing agricultural data internationally.
-It contains seven methods. Those can download the data, list all the countries of the dataset,
-provide a correlation matrix of the outputs, and plot an area chart of the agricultural output
-of a choosen country.
-It can also compare the output of choosen countries with a line graph, and plot a scatter plot
-of fertilizer and output quantity.
-Moreover, a choropleth of the total factor productivity for a selected year can be plotted.
-Lastly, an ARIMA prediction for the total factor productivity is applied and the data
-including the prediction is plotted.
+""" This module contains one class with the purpose of analyzing the internal flight.
+It contains five methods. Those can download the data, **********
 """
 
 import warnings
