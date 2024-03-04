@@ -1,142 +1,68 @@
 """ This module contains one class with the purpose of analyzing the internal flight.
-It contains five methods. Those can download the data, **********
 """
 
-import warnings
 import os
 import requests
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-import geopandas as gpd
-import numpy as np
-from pmdarima.arima import auto_arima
+from io import BytesIO
+from zipfile import ZipFile
 
-warnings.filterwarnings("ignore")
-
-
-class Agros:
+class Airplane:
     """
-    A class that downloads agricultural data and performs analysis on it.
-
-    Attributes
-    ---------------
-    data_df: Pandas Dataframe
-        dataframe where the downloaded agricultural data can be loaded into
-
-    merge_dict: dict
-        a dictionary in order to change the spelling for some countries to allow merging
-
-    geopandas_df: Geopandas df
-        a geopandas dataframe where geo dataset with country-level polygons can be loaded into
-
-
-    Methods
-    ---------------
-    download_data
-        downloads agricultural data from Github, saves it to a download folder
-        and creates Pandas DataFrame
-
-    list_countries
-        list all the available countries of the dataset
-
-    correlate_quantity
-        provides a correlation heatmap of the quality columns
-
-    area_graph
-        provides an area graph of the outputs of a selected country or the world
-
-    compare_output
-        plots the output columns of selected countries
-
-    gapminder
-        provides a scatterplot of fertilizer and output quantity for a selected year
-
-    choropleth
-        provides a choropleth plotting the total factor productivity of a selected year
-
-    predictor
-        applies an ARIMA prediction for the total factor productivity and
-        plots the data including the prediction
+    A class to download airplane data and perform analysis on it.
     """
 
     def __init__(self):
-        self.data_df = pd.DataFrame
-        self.merge_dict = {
-            "United States of America": "United States",
-            "Dem. Rep. Congo": "Democratic Republic of Congo",
-            "Dominican Rep.": "Dominican Republic",
-            "Timor-Leste": "Timor",
-            "Eq. Guinea": "Equatorial Guinea",
-            "eSwatini": "Eswatini",
-            "Solomon Is.": "Solomon Islands",
-            "N. Cyprus": "Cyprus",
-            "Somaliland": "Somalia",
-            "Bosnia and Herz.": "Bosnia and Herzegovina",
-            "S. Sudan": "South Sudan",
-        }
-        self.geopandas_df = gpd.GeoDataFrame
+        self.airlines_df = pd.DataFrame()
+        self.airplanes_df = pd.DataFrame()
+        self.airports_df = pd.DataFrame()
+        self.routes_df = pd.DataFrame()
 
     def download_data(self):
         """
-        Creates a 'downloads' folder, if it doesn't exist.
-        Downloads agricultural data from Github repository and saves it to this folder,
-        in case it is not already downloaded.
-        It also creates Pandas Dataframe from the downloaded csv file.
-        It also cleans the data so that aggregated rows (like Asia) are excluded.
+        Checks for a 'downloads' folder and creates it if it doesn't exist.
+        Downloads flight data from a GitHub repository as a zip file, saves it,
+        extracts the contents, and creates Pandas DataFrames from the CSV files:
+        - airlines.csv
+        - airplanes.csv
+        - airports.csv
+        - routes.csv
         """
-        if not os.path.exists("downloads"):
-            os.makedirs("downloads")
+        
+        downloads_dir = "downloads"
+        if not os.path.exists(downloads_dir):
+            os.makedirs(downloads_dir)
 
-        exists = os.path.isfile("downloads/download.csv")
+        zip_file_path = os.path.join(downloads_dir, "flight_data.zip")
 
-        if not exists:
+        '''Check if the zip file was already downloaded'''
+        if not os.path.exists(zip_file_path):
             response = requests.get(
-                "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/"
-                "Agricultural%20total%20factor%20productivity%20(USDA)"
-                "/Agricultural%20total%20factor%20productivity%20(USDA).csv"
+                "https://gitlab.com/adpro1/adpro2024/-/"
+                "raw/main/Files/flight_data.zip?inline=false",
+                stream=True
             )
-            with open("downloads/download.csv", "wb") as file:
-                file.write(response.content)
+            '''Ensure the request is successful'''
+            if response.status_code == 200:
+                with open(zip_file_path, "wb") as f:
+                    f.write(response.content)
 
-        data_df = pd.read_csv("downloads/download.csv")
-        countries_to_drop = [
-            "Asia",
-            "Caribbean",
-            "Central Africa",
-            "Central America",
-            "Central Asia",
-            "Central Europe",
-            "Developed Asia",
-            "Developed countries",
-            "East Africa",
-            "Eastern Europe",
-            "Former Soviet Union",
-            "High income",
-            "Horn of Africa",
-            "Latin America and the Caribbean",
-            "Least developed countries",
-            "Lower-middle income",
-            "North Africa",
-            "North America",
-            "Northeast Asia",
-            "Northern Europe",
-            "Oceania",
-            "Pacific",
-            "Sahel",
-            "South Asia",
-            "Southeast Asia",
-            "Southern Africa",
-            "Southern Europe",
-            "Sub-Saharan Africa",
-            "Upper-middle income",
-            "West Africa",
-            "West Asia",
-            "Western Europe",
-            "World",
-            "Low income",
-        ]
-        data_df = data_df.loc[~data_df["Entity"].isin(countries_to_drop)]
-        self.data_df = data_df
+        '''Extract files if the zip file is downloaded'''
+        if os.path.exists(zip_file_path):
+            with ZipFile(zip_file_path, 'r') as zip_ref:
+                zip_ref.extractall(downloads_dir)
 
-        self.geopandas_df = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
+                '''Loading data into DataFrames'''
+                self.airlines_df = pd.read_csv(os.path.join(downloads_dir, 'airlines.csv'))
+                self.airplanes_df = pd.read_csv(os.path.join(downloads_dir, 'airplanes.csv'))
+                self.airports_df = pd.read_csv(os.path.join(downloads_dir, 'airports.csv'))
+                self.routes_df = pd.read_csv(os.path.join(downloads_dir, 'routes.csv'))
+
+        '''Print the first 5 lines of each dataset'''
+        print("Airlines DataFrame:\n", self.airlines_df.head())
+        print("\nAirplanes DataFrame:\n", self.airplanes_df.head())
+        print("\nAirports DataFrame:\n", self.airports_df.head())
+        print("\nRoutes DataFrame:\n", self.routes_df.head())
+
+        print("\nDownloaded data executed!")
+
