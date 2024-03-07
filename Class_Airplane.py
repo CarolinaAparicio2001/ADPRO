@@ -9,7 +9,7 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 
 
-class Airplane:
+class Airplane():
     """
     A class to download airplane data and perform analysis on it.
     """
@@ -78,43 +78,33 @@ class Airplane:
         """
         Print the first 5 lines of each dataset
         """
-        print("Airlines DataFrame:\n", self.airlines_df.head())
-        print("\nAirplanes DataFrame:\n", self.airplanes_df.head())
-        print("\nAirports DataFrame:\n", self.airports_df.head())
-        print("\nRoutes DataFrame:\n", self.routes_df.head())
+        #print("Airlines DataFrame:\n", self.airlines_df.head())
+        #print("\nAirplanes DataFrame:\n", self.airplanes_df.head())
+        #print("\nAirports DataFrame:\n", self.airports_df.head())
+        #print("\nRoutes DataFrame:\n", self.routes_df.head())
 
-        print("\nDownloaded data executed!")
+        #print("\nDownloaded data executed!")
 
     def merge_datasets(self) -> pd.DataFrame:
-        merge_df_1 = pd.merge(
-            self.routes_df, self.airports_df, left_on="Source airport", right_on="IATA"
-        )
-        merge_df_1 = merge_df_1.rename(
-            columns={
-                "Country": "Source country",
-                "Latitude": "latitude_source",
-                "Longitude": "longitude_source",
-            }
-        )
+        self.airlines_df = self.airlines.drop(airlines.columns[0], axis=1).reset_index(drop=True)
+        self.airports_df= self.airports.drop(airports.columns[0], axis=1).reset_index(drop=True)
+        self.airports_df = self.airports_df.drop(['Type', 'Source'], axis=1)
+        self.routes_df= self.routes.drop(routes.columns[0], axis=1).reset_index(drop=True)
+        self.airplanes_df= self.airplanes.drop(airplanes.columns[0], axis=1).reset_index(drop=True)
 
-        merge_df_2 = pd.merge(
-            merge_df_1,
-            self.airports_df[["IATA", "Country", "Latitude", "Longitude"]],
-            left_on="Source airport",
-            right_on="IATA",
-        )
-        merge_df_2 = merge_df_2.rename(
-            columns={
-                "Country": "Destination country",
-                "Latitude": "latitude_destination",
-                "Longitude": "longitude_destination",
-            }
-        )
-
-        merge_df = merge_df_2.dropna(subset=["Source country", "Destination country"])
+        merge_df_1 = pd.merge(self.airports_df,self.routes_df, left_on="IATA", right_on="Source airport", how="left")
+        merge_df_1 = merge_df_1.rename(columns={"Country": "Source country","Latitude": "latitude_source","Longitude": "longitude_source"})
+        
+        merge_df_2 = pd.merge(merge_df_1,self.airports_df[["IATA", "Country", "Latitude", "Longitude"]],left_on="Source airport",right_on="IATA", how='left')
+        merge_df_2 = merge_df_2.rename(columns={'IATA_x':"IATA", "Country": "Destination country","Latitude": "latitude_destination","Longitude": "longitude_destination"})
+        merge_df_2 = merge_df_2.dropna(subset=["Source country", "Destination country"])
+        #Drop the columns that I dont need
+        merge_df_2.drop(columns=['IATA_y'], inplace=True)
 
         # Assign the resulting merge_df to the instance variable
         self.merge_df = merge_df
+        
+        print("Merge DataFrame:\n", self.merge_df.head())
 
         return self.merge_df
 
