@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 from io import BytesIO
 from zipfile import ZipFile
-from distance_airports import distance_geo
+#from distance_airports import distance_geo
 from plotnine import ggplot, aes, geom_histogram, theme_minimal, scale_fill_manual
 import geopandas as gpd
 import matplotlib.pyplot as plt
@@ -58,6 +58,7 @@ class Airplane():
         Extract files if the zip file is downloaded
         """
         if os.path.exists(zip_file_path):
+            extraction_dir = os.path.join(os.getcwd(), downloads_dir)
             with ZipFile(zip_file_path, "r") as zip_ref:
                 zip_ref.extractall(downloads_dir)
 
@@ -74,7 +75,7 @@ class Airplane():
                     os.path.join(downloads_dir, "airports.csv")
                 )
                 self.routes_df = pd.read_csv(os.path.join(downloads_dir, "routes.csv"))
-
+        
         """
         Print the first 5 lines of each dataset
         """
@@ -84,27 +85,28 @@ class Airplane():
         #print("\nRoutes DataFrame:\n", self.routes_df.head())
 
         #print("\nDownloaded data executed!")
-
+        
     def merge_datasets(self) -> pd.DataFrame:
-        self.airlines_df = self.airlines.drop(airlines.columns[0], axis=1).reset_index(drop=True)
-        self.airports_df= self.airports.drop(airports.columns[0], axis=1).reset_index(drop=True)
+    
+        self.airlines_df = self.airlines_df.drop(self.airlines_df.columns[0], axis=1).reset_index(drop=True)
+        self.airports_df= self.airports_df.drop(self.airports_df.columns[0], axis=1).reset_index(drop=True)
         self.airports_df = self.airports_df.drop(['Type', 'Source'], axis=1)
-        self.routes_df= self.routes.drop(routes.columns[0], axis=1).reset_index(drop=True)
-        self.airplanes_df= self.airplanes.drop(airplanes.columns[0], axis=1).reset_index(drop=True)
+        self.routes_df= self.routes_df.drop(self.routes_df.columns[0], axis=1).reset_index(drop=True)
+        self.airplanes_df= self.airplanes_df.drop(self.airplanes_df.columns[0], axis=1).reset_index(drop=True)
 
         merge_df_1 = pd.merge(self.airports_df,self.routes_df, left_on="IATA", right_on="Source airport", how="left")
         merge_df_1 = merge_df_1.rename(columns={"Country": "Source country","Latitude": "latitude_source","Longitude": "longitude_source"})
         
-        merge_df_2 = pd.merge(merge_df_1,self.airports_df[["IATA", "Country", "Latitude", "Longitude"]],left_on="Source airport",right_on="IATA", how='left')
-        merge_df_2 = merge_df_2.rename(columns={'IATA_x':"IATA", "Country": "Destination country","Latitude": "latitude_destination","Longitude": "longitude_destination"})
-        merge_df_2 = merge_df_2.dropna(subset=["Source country", "Destination country"])
+        merge_df = pd.merge(merge_df_1,self.airports_df[["IATA", "Country", "Latitude", "Longitude"]],left_on="Destination airport",right_on="IATA", how='left')
+        merge_df = merge_df.rename(columns={'IATA_x':"IATA", "Country": "Destination country","Latitude": "latitude_destination","Longitude": "longitude_destination"})
+        merge_df = merge_df.dropna(subset=["Source country", "Destination country"])
         #Drop the columns that I dont need
-        merge_df_2.drop(columns=['IATA_y'], inplace=True)
+        merge_df.drop(columns=['IATA_y'], inplace=True)
 
         # Assign the resulting merge_df to the instance variable
         self.merge_df = merge_df
         
-        print("Merge DataFrame:\n", self.merge_df.head())
+        #print("Merge DataFrame:\n", self.merge_df.head())
 
         return self.merge_df
 
@@ -116,7 +118,7 @@ class Airplane():
         - country (str): The name of the country where airports are to be plotted.
         """
         # Filter airports by the specified country
-        country_airports = self.airports_df[self.airports_df["Country"] == country]
+        country_airports = self.merge_df[self.merge_df["Source country"] == country]
 
         # Exit if no airports are found in the country
         if country_airports.empty:
@@ -261,3 +263,12 @@ class Airplane():
         plt.xlabel("Airplane Model")
         plt.ylabel("Number of Flights")
         plt.show()
+        
+    def aircrafts(self):
+        column_names = self.airplanes_df.columns
+        print("Column names in airplanes_df:", column_names)
+        # Assuming 'Name' is the column containing aircraft models in self.airplane_df
+        aircraft_models = self.airplanes_df['Name'].tolist()
+        print("List of Aircraft Models:")
+        for model in aircraft_models:
+            print(model)
