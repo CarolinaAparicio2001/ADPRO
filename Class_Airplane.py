@@ -212,7 +212,7 @@ class Airplane():
 
         Parameters:
             n (int): Number of airplane models to plot, that by default is 5.
-            countries: Specific country or list of countries to consider, by default is None.
+            countries (str): Specific country or list of countries to consider, by default is None.
         """
         if countries is None:
             # Plot most used planes by route using the entire dataset
@@ -234,36 +234,113 @@ class Airplane():
         plt.ylabel("Number of Routes")
         plt.show()
 
-    def plot_flights_by_country(self, country_name, internal=False):
+    def plot_flights_by_country(self, country, internal=False):
         """
-        Plot flights leaving the country with a destination in the same country or all flights.
+        Plot the map flight routes between domestic and international flights from source to destination airports.
 
         Parameters:
-            country_name (str): The name of the country.
-            internal (bool): If True, plot only internal flights. If False, plot all flights. Default is False.
+            country (str): Name of the source country.
+            Internal (bool) : If the flight is internal or not. Being by default False.
         """
+
         if internal is True:
             # Plot only internal flights
             internal_routes = self.merge_df[
-                (self.merge_df["Source country"] == country_name)
-                & (self.merge_df["Destination country"] == country_name)
+                (self.merge_df["Source country"] == country)
+                & (self.merge_df["Destination country"] == country)
             ]
-            internal_routes["Destination country"].value_counts().plot(
-                kind="bar", title=f"Internal Flights from {country_name}"
-            )
-        else:
-            # Plot all flights
-            all_routes = self.merge_df[
-                (self.merge_df["Source country"] == country_name)
-            ]
-            all_routes["Destination country"].value_counts().plot(
-                kind="bar", title=f"All Flights from {country_name}"
+            
+            # Exit if no routes are found in the country
+            if internal_routes.empty:
+                print(f"No routes found for {country}.")
+                return
+
+            # Load a map of the world
+            world = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
+
+            # Filter the map to only include the specified country
+            country_map = world[world["name"] == country]
+
+            # Exit if the country is not found in the map dataset
+            if internal_routes.empty:
+                print(f"Country '{country}' not found.")
+                return
+
+            # Convert the filtered routes data into a GeoDataFrame
+            gdf_routes = gpd.GeoDataFrame(
+                internal_routes,
+                geometry=gpd.points_from_xy(
+                    internal_routes.longitude_source, internal_routes.latitude_source
+                ),
             )
 
-        plt.xlabel("Airplane Model")
-        plt.ylabel("Number of Flights")
-        plt.show()
+            # Plotting
+            _, axis = plt.subplots(figsize=(10, 10))
+            country_map.plot(ax=axis, color="lightgrey")
+
+            # Plot airports
+            gdf_routes.plot(ax=axis, marker="o", color="blue", markersize=5, label='Airports')
         
+            # Plot routes
+            for _, row in gdf_routes.iterrows():
+                dest_coords = (
+                    row["longitude_destination"],
+                    row["latitude_destination"]
+                )
+                route = LineString([Point(row.geometry.x, row.geometry.y), Point(dest_coords)])
+                gpd.GeoDataFrame(geometry=[route]).plot(ax=axis, color='red', label='Routes')
+
+            plt.title(f"Internal flights from {country}")
+            plt.legend()
+            plt.show()
+
+            
+        else:
+            all_routes = self.merge_df[
+                (self.merge_df["Source country"] == country)
+            ]
+             # Exit if no routes are found in the country
+            if all_routes.empty:
+                print(f"No routes found for {country}.")
+                return
+
+            # Load a map of the world
+            world = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
+
+            # Exit if the country is not found in the map dataset
+            if all_routes.empty:
+                print(f"Country '{country}' not found.")
+                return
+
+            # Convert the filtered routes data into a GeoDataFrame
+            gdf_routes = gpd.GeoDataFrame(
+                all_routes,
+                geometry=gpd.points_from_xy(
+                    all_routes.longitude_source, all_routes.latitude_source
+                ),
+            )
+
+            # Plotting
+            _, axis = plt.subplots(figsize=(10, 10))
+            world.plot(ax=axis, color="lightgrey")
+
+            # Plot airports
+            gdf_routes.plot(ax=axis, marker="o", color="blue", markersize=5, label='Airports')
+        
+            # Plot routes
+            for _, row in gdf_routes.iterrows():
+                dest_coords = (
+                    row["longitude_destination"],
+                    row["latitude_destination"]
+                )
+                route = LineString([Point(row.geometry.x, row.geometry.y), Point(dest_coords)])
+                gpd.GeoDataFrame(geometry=[route]).plot(ax=axis, color='red', label='Routes')
+
+            plt.title(f"Internal flights from {country}")
+            plt.legend()
+            plt.show()
+
+    # DAY2, PHASE 1, METHOD 1
     def aircrafts(self):
         column_names = self.airplanes_df.columns
         print("Column names in airplanes_df:", column_names)
@@ -272,3 +349,66 @@ class Airplane():
         print("List of Aircraft Models:")
         for model in aircraft_models:
             print(model)
+
+    
+    # DAY2, PHASE 1, METHOD 2
+    def aircraft_info(self, aircraft_name):
+        aircraft_models = self.airplanes_df['Name'].tolist()
+
+        # Check if the provided aircraft_name is in the list
+        if aircraft_name in aircraft_models:
+            # Retrieve information for the specified aircraft_name
+            info = self.airplanes_df[self.airplanes_df['Name'] == aircraft_name][['Name', 'IATA code', 'ICAO code']]
+            print(f"Aircraft Information for {aircraft_name}:")
+            print(info.to_string(index=False))
+        else:
+            # Attempt to find close matches
+            close_matches = get_close_matches(aircraft_name, aircraft_models, n=5, cutoff=0.3)
+            if close_matches:
+                print(f"Aircraft '{aircraft_name}' not found. Did you mean:")
+                for match in close_matches:
+                    print(f"- {match}")
+            else:
+                # If no close matches found, suggest a generic list of recommended aircraft names
+                print(f"No close matches found for '{aircraft_name}'.")
+                
+                # Shuffle the list of aircraft names to ensure a different subset is selected each time
+                all_aircraft_names = self.airplanes_df['Name'].tolist()
+                random.shuffle(all_aircraft_names)  # Shuffle the list in place
+
+                # Select the top 5 (or however many you prefer) from the shuffled list
+                recommended_list = all_aircraft_names[:5]
+                print("Here are some recommended aircraft names to choose from:")
+                for recommend in recommended_list:
+                    print(f"- {recommend}")
+            
+     # DAY2, PHASE 1, METHOD 4       
+    def airport_info(self, airport_name):
+        airport_models = self.merge_df['Name'].tolist()
+
+        # Check if the provided airport_name is in the list
+        if airport_name in airport_models:
+            # Retrieve information for the specified airport_name
+            unique_info = self.merge_df[self.merge_df['Name'] == airport_name][['Airport ID', 'Name', 'Source airport', 'City', 'latitude_source', 'longitude_source']].drop_duplicates(subset=['Name'])
+            print(f"Airport Information for {airport_name}:")
+            print(unique_info.to_string(index=False))
+        else:
+            # Attempt to find close matches
+            close_matches = get_close_matches(airport_name, airport_models, n=5, cutoff=0.3)
+            if close_matches:
+                print(f"Aircraft '{airport_name}' not found. Did you mean:")
+                for match in close_matches:
+                    print(f"- {match}")
+            else:
+                # If no close matches found, suggest a generic list of recommended aircraft names
+                print(f"No close matches found for '{airport_name}'.")
+                
+                # Shuffle the list of aircraft names to ensure a different subset is selected each time
+                all_airport_names = self.merge_df['Name'].tolist()
+                random.shuffle(all_airport_names)  # Shuffle the list in place
+
+                # Select the top 5 (or however many you prefer) from the shuffled list
+                recommended_list = all_airport_names[:5]
+                print("Here are some recommended aircraft names to choose from:")
+                for recommend in recommended_list:
+                    print(f"- {recommend}")
