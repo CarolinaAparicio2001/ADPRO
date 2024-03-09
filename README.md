@@ -1,93 +1,47 @@
-# Group_05
+# Group_05 Project Icaras: analysis of commercial airflight data for a sustainability study
 
+## Description
+
+This repository contains our advanced programming group project, which focuses on analyzing flight data from the International Air Transport Association. The objective of this project is to explore and understand trends, efficiency, and dynamics within the global aviation industry. Our analysis aims to contribute to enhancing flight efficiency and reducing environmental impacts, aligning with the broader goal of the green transition.
+
+The project is part of the Advanced Programming course at Nova SBE. The project's primary objective is to enhance flight planning by analyzing aviation data. Our Jupyter Notebook focuses on investigating flight routes, airport connectivity, and flight distances to promote sustainable aviation practices. By examining flight networks and analyzing distance frequencies, we hope to uncover insights that can lead to more efficient and environmentally friendly flight planning. This project combines advanced programming skills with real-world challenges to contribute to the future of sustainable aviation.
+
+The project is shared work by Group 5:\
+Carolina Aparicio - 61582, 61582@novasbe.pt\
+Erica Francalanci - 61600, 61600@novasbe.pt\
+Julia Cheng - 60490, 60490@novasbe.pt\
+Sara Favita - 60141, 60141@novasbe.pt
+
+## Data
+We will be using data from [International Air Transport Association](https://www.iata.org/). The datasets can be found [here](https://gitlab.com/adpro1/adpro2024/-/raw/main/Files/flight_data.zip?inline=false).
 
 
 ## Getting started
+1. Our repository is structured as follows: In the main directory, you can find our showcase notebook ```showcase_notebook.ipynb```. It contains an analysis of the data and showcases our findings. For the project, a class named ```Airplane``` with several methods was created. All the methods used belong to this class. The file ```class_airplane.py``` containing the class can be found in the python_files directory.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+2. Run the ```download_data``` method first. It will download the flight data from GitHub and save it to a folder called downloads.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
 
-## Add your files
+## Airplane Class
+The class adheres to PEP8 standards, utilizing black and pylint for code formatting and linting.
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+```Airplane has several methods:```
 
-```
-cd existing_repo
-git remote add origin https://gitlab.com/sara.favita2000/group_05.git
-git branch -M main
-git push -uf origin main
-```
+1. download_data: Downloads flight data from GitHub, saves it to a download folder, and creates Pandas DataFrames for airlines, airplanes, airports, and routes.
+2. merge_datasets: Merges the various datasets into a single DataFrame, preparing it for analysis.
+3. distance_analysis: Calculates the geographical distance between source and destination airports and creates a histogram to visualize the distribution of these distances.
+4. plot_airports_in_country: Plots all the airports in a selected country, marking them on a map.
+5. plot_flights_by_code_airports: Visualizes the number of flights originating from a specific airport, showing the most common destinations.
+6. plot_most_used_airplane_models: Displays a bar chart of the most frequently used airplane models in the dataset or within a specified set of countries.
+7. plot_flights_by_country: Shows the number of flights departing from a particular country, with the option to focus on internal (domestic) flights.
+8. plot_airports_in_country: Plots all airports within a specified country, indicating their locations on a national map.
 
-## Integrate with your tools
+## Airplane Class
+The class is PEP8 compliant, using black and pylint.
 
-- [ ] [Set up project integrations](https://gitlab.com/sara.favita2000/group_05/-/settings/integrations)
-
-## Collaborate with your team
-
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
 
 ## License
-For open source projects, say how it is licensed.
+GPL-3.0 license
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+## Project Status
+In Progress
