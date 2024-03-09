@@ -6,6 +6,7 @@ from zipfile import ZipFile
 from plotnine import ggplot, aes, geom_histogram, theme_minimal, scale_fill_manual
 import geopandas as gpd
 import matplotlib.pyplot as plt
+from distance_airports import distance_geo
 from shapely.geometry import Point, LineString, MultiPoint
 from IPython.display import display, HTML
 
@@ -77,16 +78,7 @@ class Airplane():
                     os.path.join(downloads_dir, "airports.csv")
                 )
                 self.routes_df = pd.read_csv(os.path.join(downloads_dir, "routes.csv"))
-        
-        """
-        Print the first 5 lines of each dataset
-        """
-        #print("Airlines DataFrame:\n", self.airlines_df.head())
-        #print("\nAirplanes DataFrame:\n", self.airplanes_df.head())
-        #print("\nAirports DataFrame:\n", self.airports_df.head())
-        #print("\nRoutes DataFrame:\n", self.routes_df.head())
 
-        #print("\nDownloaded data executed!")
         
     def merge_datasets(self) -> pd.DataFrame:
     
@@ -179,6 +171,7 @@ class Airplane():
                 values=["#011526", "#C9DFF2", "#5496BF", "#75B2BF", "#025159"]
             )
         )
+
         return distance_plot
 
 
@@ -287,111 +280,105 @@ class Airplane():
         plt.ylabel("Number of Routes")
         plt.show()
 
-    def plot_flights_by_country(self, country, internal=False):
-        """
-        Plot the map flight routes between domestic and international flights from source to destination airports.
 
-        Parameters:
-            country (str): Name of the source country.
-            Internal (bool) : If the flight is internal or not. Being by default False.
-        """
-
-        if internal is True:
-            # Plot only internal flights
-            internal_routes = self.merge_df[
-                (self.merge_df["Source country"] == country)
-                & (self.merge_df["Destination country"] == country)
-            ]
-            
-            # Exit if no routes are found in the country
-            if internal_routes.empty:
-                print(f"No routes found for {country}.")
-                return
-
-            # Load a map of the world
-            world = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
-
-            # Filter the map to only include the specified country
-            country_map = world[world["name"] == country]
-
-            # Exit if the country is not found in the map dataset
-            if internal_routes.empty:
-                print(f"Country '{country}' not found.")
-                return
-
-            # Convert the filtered routes data into a GeoDataFrame
-            gdf_routes = gpd.GeoDataFrame(
-                internal_routes,
-                geometry=gpd.points_from_xy(
-                    internal_routes.longitude_source, internal_routes.latitude_source
-                ),
-            )
-
-            # Plotting
-            _, axis = plt.subplots(figsize=(10, 10))
-            country_map.plot(ax=axis, color="lightgrey")
-
-            # Plot airports
-            gdf_routes.plot(ax=axis, marker="o", color="blue", markersize=5, label='Airports')
+    def plot_flights_by_country(self, country, internal=False, cutoff_distance=1000):
+                """
+                Plot the map flight routes between domestic and international flights from source to destination airports.
         
-            # Plot routes
-            for _, row in gdf_routes.iterrows():
-                dest_coords = (
-                    row["longitude_destination"],
-                    row["latitude_destination"]
-                )
-                route = LineString([Point(row.geometry.x, row.geometry.y), Point(dest_coords)])
-                gpd.GeoDataFrame(geometry=[route]).plot(ax=axis, color='red', label='Routes')
-
-            plt.title(f"Internal flights from {country}")
-            plt.legend()
-            plt.show()
-
-            
-        else:
-            all_routes = self.merge_df[
-                (self.merge_df["Source country"] == country)
-            ]
-             # Exit if no routes are found in the country
-            if all_routes.empty:
-                print(f"No routes found for {country}.")
-                return
-
-            # Load a map of the world
-            world = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
-
-            # Exit if the country is not found in the map dataset
-            if all_routes.empty:
-                print(f"Country '{country}' not found.")
-                return
-
-            # Convert the filtered routes data into a GeoDataFrame
-            gdf_routes = gpd.GeoDataFrame(
-                all_routes,
-                geometry=gpd.points_from_xy(
-                    all_routes.longitude_source, all_routes.latitude_source
-                ),
-            )
-
-            # Plotting
-            _, axis = plt.subplots(figsize=(10, 10))
-            world.plot(ax=axis, color="lightgrey")
-
-            # Plot airports
-            gdf_routes.plot(ax=axis, marker="o", color="blue", markersize=5, label='Airports')
+                Parameters:
+                    country (str): Name of the source country.
+                    internal (bool): If the flight is internal or not. Being by default False.
+                    cutoff_distance (float): Threshold in km to differentiate between short-haul and long-haul flights.
+                """
         
-            # Plot routes
-            for _, row in gdf_routes.iterrows():
-                dest_coords = (
-                    row["longitude_destination"],
-                    row["latitude_destination"]
-                )
-                route = LineString([Point(row.geometry.x, row.geometry.y), Point(dest_coords)])
-                gpd.GeoDataFrame(geometry=[route]).plot(ax=axis, color='red', label='Routes')
+                # Ensure the distance column is available
+                if 'distance' not in self.merge_df.columns:
+                    self.distance_analysis()  # Compute distances if not already done
+        
+                if internal:
+                    internal_routes = self.merge_df[
+                        (self.merge_df["Source country"] == country) &
+                        (self.merge_df["Destination country"] == country)
+                    ]
+        
+                    if internal_routes.empty:
+                        print(f"No routes found for {country}.")
+                        return
+        
+                    world = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
+                    country_map = world[world["name"] == country]
+                    if country_map.empty:
+                        print(f"Country '{country}' not found.")
+                        return
+        
+                    _, axis = plt.subplots(figsize=(10, 10))
+                    country_map.plot(ax=axis, color="lightgrey")
+        
+                    total_short_haul_distance = 0
+                    no_double_routes = set()
+                    short_haul_count = 0
+        
+                    for _, row in internal_routes.iterrows():
+                        round_trip_airports = tuple(sorted([row["Source airport"], row["Destination airport"]]))
+                        if round_trip_airports not in no_double_routes:
+                            distance = row['distance']
+                            if distance <= cutoff_distance:
+                                total_short_haul_distance += distance
+                                short_haul_count += 1
+                                no_double_routes.add(round_trip_airports)
+                                color = 'tomato'
+                            else:
+                                color = 'midnightblue'
+        
+                            route = LineString([Point(row['longitude_source'], row['latitude_source']), Point(row['longitude_destination'], row['latitude_destination'])])
+                            gpd.GeoDataFrame(geometry=[route]).plot(ax=axis, color=color, linewidth=2)
 
-            plt.title(f"Internal flights from {country}")
-            plt.legend()
-            plt.show()
+                    co2_reductions = total_short_haul_distance * 0.86
+        
+                    # Annotate total information about short-haul flights
+                    plt.annotate(f'Total short-haul flights: {short_haul_count}\nTotal short-haul distance: {total_short_haul_distance:.2f} km\nCarbon emissions potencial reductions: {co2_reductions} km', xy=(0.07, 1.2), xycoords='axes fraction', fontsize=12, backgroundcolor='white')
+        
+                    plt.legend()
+                    plt.title(f"Internal flights within {country} (Cutoff: {cutoff_distance}km)")
+                    plt.show()
+                    
+                else:
+                    all_routes = self.merge_df[(self.merge_df["Source country"] == country)]
+                    if all_routes.empty:
+                        print(f"No routes found for {country}.")
+                        return
+        
+                    world = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
+                    _, axis = plt.subplots(figsize=(10, 10))
+                    world.plot(ax=axis, color="lightgrey")
+        
+                    # This section assumes that the plotting for non-internal (all routes) does not differentiate by distance
+                    # Extend this logic if you wish to categorize all flights by distance as well.
+                    
+                    total_short_haul_distance = 0
+                    no_double_routes = set()
+                    short_haul_count = 0
+        
+                    for _, row in all_routes.iterrows():
+                        round_trip_airports = tuple(sorted([row["Source airport"], row["Destination airport"]]))
+                        if round_trip_airports not in no_double_routes:
+                            distance = row['distance']
+                            if distance <= cutoff_distance:
+                                total_short_haul_distance += distance
+                                short_haul_count += 1
+                                no_double_routes.add(round_trip_airports)
+                                color = 'tomato'
+                            else:
+                                color = 'midnightblue'
+        
+                            route = LineString([Point(row['longitude_source'], row['latitude_source']), Point(row['longitude_destination'], row['latitude_destination'])])
+                            gpd.GeoDataFrame(geometry=[route]).plot(ax=axis, color=color, linewidth=2)
+        
+                    plt.title(f"All flights from {country}")
+                    plt.legend()
+                    plt.show()
+
+                    
 
     # DAY2, PHASE 1, METHOD 1
     def aircrafts(self):
@@ -434,6 +421,8 @@ class Airplane():
                 print("Here are some recommended aircraft names to choose from:")
                 for recommend in recommended_list:
                     print(f"- {recommend}")
+
+
             
      # DAY2, PHASE 1, METHOD 4       
     def airport_info(self, airport_name):
