@@ -3,10 +3,12 @@ import requests
 import pandas as pd
 from io import BytesIO
 from zipfile import ZipFile
-#from distance_airports import distance_geo
 from plotnine import ggplot, aes, geom_histogram, theme_minimal, scale_fill_manual
 import geopandas as gpd
 import matplotlib.pyplot as plt
+from shapely.geometry import Point, LineString, MultiPoint
+from IPython.display import display, HTML
+
 
 
 class Airplane():
@@ -179,32 +181,83 @@ class Airplane():
         )
         return distance_plot
 
-    def plot_flights_by_code_airports(self, code_airport, n=5, internal=False):
 
+    def plot_flights_by_code_airports(self, code_airport, internal=False):
+        
+        """
+        This function plots flight routes originating from a specified airport. 
+        If the 'internal' parameter is set to True, it will display only domestic flights within the specified airport's country and show a detailed map of 
+        that country. 
+        If set to False, it will display all flights from the airport on a global map. 
+    
+        Parameters: 
+        1. 'code_airport' - a string containing the IATA or ICAO code of the source airport. 
+        2. 'internal' - a boolean flag indicating whether to plot only domestic flights (True) or all flights (False). The default value is False.
+        """
+            
         country_of_source = self.merge_df.loc[
             self.merge_df["Source airport"] == code_airport, "Source country"
         ].iloc[0]
 
+        
+        world = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
+        country_geom = world[world["name"] == country_of_source].geometry.unary_union
+
+        
         if internal:
-            # Plot only internal flights
-            internal_routes = self.merge_df[
-                (self.merge_df["Source airport"] == code_airport)
-                & (self.merge_df["Destination airport"] == code_airport)
+            flights = self.merge_df[
+                (self.merge_df["Source airport"] == code_airport) &
+                (self.merge_df["Destination country"] == country_of_source) &
+                (self.merge_df["Source country"] == country_of_source)
             ]
-            # Limit to top n destination airports
-            internal_routes["Destination airport"].value_counts().head(n).plot(
-                kind="bar", title=f"Top {n} Internal Flights from {code_airport}"
-            )
         else:
-            # Plot all flights
-            all_routes = self.merge_df[self.merge_df["Source airport"] == code_airport]
-            # Limit to top n destination airports
-            all_routes["Destination airport"].value_counts().head(n).plot(
-                kind="bar", title=f"Top {n} Flights from {code_airport}"
-            )
-        plt.xlabel("Destination Airport")
-        plt.ylabel("Number of Flights")
+            flights = self.merge_df[
+                (self.merge_df["Source airport"] == code_airport)
+            ]
+
+        if flights.empty:
+            print(f"No flights found for the specified criteria from {code_airport}.")
+            return
+
+        
+        source_points = gpd.points_from_xy(flights.longitude_source, flights.latitude_source)
+        destination_points = gpd.points_from_xy(flights.longitude_destination, flights.latitude_destination)
+        
+        
+        all_points = MultiPoint(list(source_points) + list(destination_points))
+
+        
+        gdf_flights = gpd.GeoDataFrame(flights, geometry=source_points)
+        gdf_destinations = gpd.GeoDataFrame(flights, geometry=destination_points)
+
+        _, axis = plt.subplots(figsize=(10, 10))
+
+        if internal:
+            
+            country_plot = world[world["name"] == country_of_source]
+            country_plot.plot(ax=axis, color="lightgrey")
+            
+            
+            minx, miny, maxx, maxy = country_geom.bounds
+            axis.set_xlim(minx, maxx)
+            axis.set_ylim(miny, maxy)
+        else:
+           
+            world.plot(ax=axis, color="lightgrey")
+            world[world["name"] == country_of_source].plot(ax=axis, color="lightblue")
+
+        
+        gdf_flights.plot(ax=axis, marker='o', color='blue', markersize=20, label='Source Airports')
+        gdf_destinations.plot(ax=axis, marker='^', color='green', markersize=20, label='Destination Airports')
+
+        
+        for src_point, dest_point in zip(source_points, destination_points):
+            axis.plot([src_point.x, dest_point.x], [src_point.y, dest_point.y], color="red", linewidth=1, marker='')
+
+        plt.title(f"{'Internal' if internal else ''} Flights from {code_airport}")
+        plt.legend()
         plt.show()
+
 
     def plot_most_used_airplane_models(self, n: int = 5, countries=None):
         """
