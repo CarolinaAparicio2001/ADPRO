@@ -378,10 +378,12 @@ class Airplane():
                     plt.legend()
                     plt.show()
 
-                    
-
-    # DAY2, PHASE 1, METHOD 1
     def aircrafts(self):
+        """
+            Plot a list of aircraft models from the airplanes_df DataFrame.
+
+            This method prints the column names in airplanes_df and then prints a list of aircraft models.
+        """
         column_names = self.airplanes_df.columns
         print("Column names in airplanes_df:", column_names)
         # Assuming 'Name' is the column containing aircraft models in self.airplane_df
@@ -390,9 +392,13 @@ class Airplane():
         for model in aircraft_models:
             print(model)
 
-    
-    # DAY2, PHASE 1, METHOD 2
     def aircraft_info(self, aircraft_name):
+        """
+            Plot the information about aircaft name.
+
+            Parameters:
+                aircraft_name (str): The name of the aircraft for which information is to be retrieved.
+        """
         aircraft_models = self.airplanes_df['Name'].tolist()
 
         # Check if the provided aircraft_name is in the list
@@ -432,9 +438,14 @@ class Airplane():
                 print("Here are some recommended aircraft names to choose from:")
                 for recommend in recommended_list:
                     print(f"- {recommend}")
-            
-     # DAY2, PHASE 1, METHOD 4       
+                  
     def airport_info(self, airport_name):
+        """
+            Plot the information about airport name.
+
+            Parameters:
+                airport_name (str): The name of the airport for which information is to be retrieved.
+        """
         airport_models = self.merge_df['Name'].tolist()
 
         if airport_name in airport_models:
