@@ -378,10 +378,12 @@ class Airplane():
                     plt.legend()
                     plt.show()
 
-                    
-
-    # DAY2, PHASE 1, METHOD 1
     def aircrafts(self):
+        """
+            Plot a list of aircraft models from the airplanes_df DataFrame.
+
+            This method prints the column names in airplanes_df and then prints a list of aircraft models.
+        """
         column_names = self.airplanes_df.columns
         print("Column names in airplanes_df:", column_names)
         # Assuming 'Name' is the column containing aircraft models in self.airplane_df
@@ -390,17 +392,32 @@ class Airplane():
         for model in aircraft_models:
             print(model)
 
-    
-    # DAY2, PHASE 1, METHOD 2
     def aircraft_info(self, aircraft_name):
+        """
+            Plot the information about aircaft name.
+
+            Parameters:
+                aircraft_name (str): The name of the aircraft for which information is to be retrieved.
+        """
         aircraft_models = self.airplanes_df['Name'].tolist()
 
         # Check if the provided aircraft_name is in the list
         if aircraft_name in aircraft_models:
             # Retrieve information for the specified aircraft_name
-            info = self.airplanes_df[self.airplanes_df['Name'] == aircraft_name][['Name', 'IATA code', 'ICAO code']]
-            print(f"Aircraft Information for {aircraft_name}:")
-            print(info.to_string(index=False))
+            query = f"Aircraft Information for {aircraft_name}:"
+            query += f"\nName: {aircraft_name}"
+            query += f"\nIATA code: {self.airplanes_df.loc[self.airplanes_df['Name'] == aircraft_name, 'IATA code'].iloc[0]}"
+            query += f"\nICAO code: {self.airplanes_df.loc[self.airplanes_df['Name'] == aircraft_name, 'ICAO code'].iloc[0]}"
+
+            # Create an instance of ChatOpenAI with a low temperature for focused responses
+            llm = ChatOpenAI(temperature=0.1)
+
+            # Invoke the LLM with the query
+            result = llm.invoke(query)
+
+            # Print the LLM-generated content as a Markdown table
+            print(result.content)
+            
         else:
             # Attempt to find close matches
             close_matches = get_close_matches(aircraft_name, aircraft_models, n=5, cutoff=0.3)
@@ -421,19 +438,33 @@ class Airplane():
                 print("Here are some recommended aircraft names to choose from:")
                 for recommend in recommended_list:
                     print(f"- {recommend}")
-
-
-            
-     # DAY2, PHASE 1, METHOD 4       
+                  
     def airport_info(self, airport_name):
+        """
+            Plot the information about airport name.
+
+            Parameters:
+                airport_name (str): The name of the airport for which information is to be retrieved.
+        """
         airport_models = self.merge_df['Name'].tolist()
 
-        # Check if the provided airport_name is in the list
         if airport_name in airport_models:
             # Retrieve information for the specified airport_name
             unique_info = self.merge_df[self.merge_df['Name'] == airport_name][['Airport ID', 'Name', 'Source airport', 'City', 'latitude_source', 'longitude_source']].drop_duplicates(subset=['Name'])
             print(f"Airport Information for {airport_name}:")
-            print(unique_info.to_string(index=False))
+            #print(unique_info.to_string(index=False))
+
+            # Construct a query for the language model
+            query = f"Provide details for the airport named {airport_name}. Include information such as Airport ID, Source airport, City, Latitude, and Longitude."
+
+            # Create an instance of ChatOpenAI with a low temperature for focused responses
+            llm = ChatOpenAI(temperature=0.1)
+
+            # Invoke the LLM with the query
+            result = llm.invoke(query)
+
+            # Print the LLM-generated content as a Markdown table
+            print(result.content)
         else:
             # Attempt to find close matches
             close_matches = get_close_matches(airport_name, airport_models, n=5, cutoff=0.3)
