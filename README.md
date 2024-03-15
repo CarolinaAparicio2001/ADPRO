@@ -69,35 +69,35 @@ The class adheres to PEP8 standards, utilizing black and pylint for code formatt
    - Usage: `airplane.distance_analysis()`
 5. **plot_flights_by_code_airports:**
    - Visualizes the number of flights originating from a specific airport, providing flexibility to focus on either domestic or all flights.
-   - Usage: `airplane_instance.plot_flights_by_code_airports(code_airport, internal=False)`
+   - Usage: `airplane.plot_flights_by_code_airports(code_airport, internal=False)`
 6. **plot_most_used_airplane_models:**
    - Displays a bar chart of the most frequently used airplane models in the dataset or within a specified set of countries.
    - Usage: `airplane.plot_most_used_airplane_models(countries = None)`
 7. **plot_flights_by_country:**
    - This method presents flight distribution from a specified country and allows a focus on domestic flights.It calculates carbon emissions reductions for short-haul flights, providing insights into the environmental impact of air transportation.
-   - Usage: `airplane_instance.plot_flights_by_country(country, internal=False, cutoff_distance=500)`
+   - Usage: `airplane.plot_flights_by_country(country, internal=False, cutoff_distance=500)`
 8. **aircrafts:**
    - Lists the aircraft models available in the dataset.
    - Usage: `airplane.aircrafts()`
 9. **aircraft_info:**
    - Provides detailed information about a specific aircraft model, including its IATA code and ICAO code.
-   - Usage: `airplane.aircraft_info()`
+   - Usage: `airplane.aircraft_info(aircraft_name)`
 10. **airport_info:**
    - Provides detailed information about a specific airport, including its ID, source airport, city, latitude, and longitude.
-   - Usage: `airplane.airport_info()`
+   - Usage: `airplane.airport_info(airport_name)`
 
 
 ## TestDistanceGeo Class
 
 The class adheres to PEP8 standards, utilizing black and pylint for code formatting and linting.
 
-1. **test_distance_geo_same_location** 
+1. **test_distance_geo_same_location:** 
    - Tests distance with same airport as source and destination airport.
 
-2. **test_distance_geo_different_airports_same_country** 
+2. **test_distance_geo_different_airports_same_country:** 
    - Test distance from different airports at the same country.
 
-3. **test_distance_geo_different_countries** 
+3. **test_distance_geo_different_countries:** 
    - Test distance from airports from different countries.
 
 
