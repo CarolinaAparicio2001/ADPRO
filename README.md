@@ -23,6 +23,7 @@ Our repository is structured as follows:
 - In the main directory, you can find our showcase notebook ```showcase_notebook.ipynb```. It contains an analysis of the data and showcases our findings.
 - `python_files/`: Contains the python code files
       - `class_airplane.py`: Python class `Airplane` with several methods was created. All the methods used belong to this class.
+  
       - `distance_airports.py`: There is a function called `distance_geo` that calculates the geographical distance between two points using latitude and longitude coordinates. It works independently and has robust error handling, returning 0 in case of calculation failures.
 - `flight_data/:` Contains our datasets
 
