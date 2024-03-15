@@ -20,6 +20,8 @@ from shapely.geometry import Point, LineString
 from plotnine import ggplot, aes, geom_histogram, theme_minimal, scale_fill_manual
 from langchain_openai import ChatOpenAI
 
+# Local application libraries
+from distance_airports import distance_geo
 
 # Local application libraries
 from distance_airports import distance_geo
@@ -30,6 +32,7 @@ class Airplane:
     A class to download airplane data and perform analysis on it.
     """
 
+class Airplane:
     def __init__(self):
         self.airlines_df = pd.DataFrame()
         self.airplanes_df = pd.DataFrame()
@@ -38,25 +41,10 @@ class Airplane:
         self.merge_df = pd.DataFrame()
 
     def download_data(self):
-        """
-        Checks for a 'downloads' folder and creates it if it doesn't exist.
-        Downloads flight data from a GitHub repository as a zip file, saves it,
-        extracts the contents, and creates Pandas DataFrames from the CSV files:
-        - airlines.csv
-        - airplanes.csv
-        - airports.csv
-        - routes.csv
-        """
-
         downloads_dir = "downloads"
         if not os.path.exists(downloads_dir):
             os.makedirs(downloads_dir)
-
         zip_file_path = os.path.join(downloads_dir, "flight_data.zip")
-
-        """
-        Check if the zip file was already downloaded
-        """
         if not os.path.exists(zip_file_path):
             response = requests.get(
                 "https://gitlab.com/adpro1/adpro2024/-/"
@@ -64,20 +52,16 @@ class Airplane:
                 stream=True,
                 timeout=10,
             )
-            """
-            Ensure the request is successful
-            """
             if response.status_code == 200:
-                with open(zip_file_path, "wb") as f:
-                    f.write(response.content)
-
-        """
-        Extract files if the zip file is downloaded
-        """
+                with open(zip_file_path, "wb") as file:
+                    file.write(response.content)
         if os.path.exists(zip_file_path):
-            extraction_dir = os.path.join(os.getcwd(), downloads_dir)
-            with ZipFile(zip_file_path, "r") as zip_ref:
+            with ZipFile(zip_file_path, 'r') as zip_ref:
                 zip_ref.extractall(downloads_dir)
+                self.airlines_df = pd.read_csv(os.path.join(downloads_dir, 'airlines.csv'))
+                self.airplanes_df = pd.read_csv(os.path.join(downloads_dir, 'airplanes.csv'))
+                self.airports_df = pd.read_csv(os.path.join(downloads_dir, 'airports.csv'))
+                self.routes_df = pd.read_csv(os.path.join(downloads_dir, 'routes.csv'))
 
                 """
                 Loading data into DataFrames
@@ -165,48 +149,22 @@ class Airplane:
         return self.merge_df
 
     def plot_airports_in_country(self, country):
-        """
-        Plot airports within the chosen country and use the ICAOs as legends.
-
-        Parameters:
-        - country (str): The name of the country where airports are to be plotted.
-        """
-        # Filter airports by the specified country
         country_airports = self.merge_df[self.merge_df["Source country"] == country]
-
-        # Exit if no airports are found in the country
         if country_airports.empty:
             print(f"No airports found in {country}.")
             return
-
-        # Load a map of the world
-        world = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
-
-        # Filter the map to only include the specified country
+        world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
         country_map = world[world["name"] == country]
-
-        # Exit if the country is not found in the map dataset
         if country_map.empty:
             print(f"Country '{country}' not found.")
             return
-
-        # Convert the filtered airports data into a GeoDataFrame
         gdf_airports = gpd.GeoDataFrame(
-            country_airports,
-            geometry=gpd.points_from_xy(
-                country_airports.Longitude, country_airports.Latitude
-            ),
+            country_airports, 
+            geometry=gpd.points_from_xy(country_airports.longitude_source, country_airports.latitude_source)
         )
-
-        # Plotting
-        _, axis = plt.subplots(figsize=(10, 10))
-        country_map.plot(ax=axis, color="lightgrey")
-        gdf_airports.plot(ax=axis, marker="o", color="red", markersize=5)
-
-        # Annotate each airport with its ICAO code
-        for _, row in gdf_airports.iterrows():
-            axis.text(row.geometry.x, row.geometry.y, row["ICAO"], fontsize=8)
-
+        fig, ax = plt.subplots(figsize=(10, 10))
+        country_map.plot(ax=ax, color='lightgrey')
+        gdf_airports.plot(ax=ax, marker='o', color='red', markersize=5)
         plt.title(f"Airports in {country}")
         plt.show()
 
@@ -216,25 +174,19 @@ class Airplane:
         """
         self.merge_df["distance"] = self.merge_df.apply(
             lambda row: distance_geo(
-                row["latitude_source"],
-                row["longitude_source"],
-                row["latitude_destination"],
-                row["longitude_destination"],
+                row['latitude_source'],
+                row['longitude_source'],
+                row['latitude_destination'],
+                row['longitude_destination']
             ),
-            axis=1,
+            axis=1
         )
-
-        self.merge_df["distance"].head()
-
         distance_plot = (
-            ggplot(self.merge_df, aes(x="distance"))
-            + geom_histogram(bins=30, fill="#5496BF", color="black")
+            ggplot(self.merge_df, aes(x='distance'))
+            + geom_histogram(bins=30, fill='#5496BF', color='black')
             + theme_minimal()
-            + scale_fill_manual(
-                values=["#011526", "#C9DFF2", "#5496BF", "#75B2BF", "#025159"]
-            )
+            + scale_fill_manual(values=['#011526', '#C9DFF2', '#5496BF', '#75B2BF', '#025159'])
         )
-
         return distance_plot
 
     def plot_flights_by_code_airports(self, code_airport, internal=False):
@@ -277,9 +229,8 @@ class Airplane:
 
         gdf_flights = gpd.GeoDataFrame(flights, geometry=source_points)
         gdf_destinations = gpd.GeoDataFrame(flights, geometry=destination_points)
-
-        _, axis = plt.subplots(figsize=(10, 10))
-
+    
+        fig, axis = plt.subplots(figsize=(10, 10))
         if internal:
 
             country_plot = world[world["name"] == country_of_source]
@@ -319,28 +270,21 @@ class Airplane:
 
     def plot_most_used_airplane_models(self, n: int = 5, countries=None):
         """
-        Plot the most used airplane models based on the number of routes.
-
+        Plots the most used airplane models based on the number of routes.
+    
         Parameters:
-            n (int): Number of airplane models to plot, that by default is 5.
-            countries (str): Specific country or list of countries to consider, by default is None.
+        - n (int): Number of airplane models to plot, defaults to 5.
+        - countries (list/str): Specific country or list of countries to consider; defaults to None.
         """
-        if countries is None:
-            # Plot most used planes by route using the entire dataset
-            top_airplanes = self.merge_df["Equipment"].value_counts().nlargest(n)
-        else:
-            # Plot most used planes by route for a specific country or list of countries
+        if countries:
             if isinstance(countries, str):
                 countries = [countries]
-
-            filtered_routes = self.merge_df[
-                self.merge_df["Source country"].isin(countries)
-            ]
+            filtered_routes = self.merge_df[self.merge_df["Source country"].isin(countries)]
             top_airplanes = filtered_routes["Equipment"].value_counts().nlargest(n)
-
-        top_airplanes.plot(
-            kind="bar", title=f"Top {n} Airplane Models by Number of Routes"
-        )
+        else:
+            top_airplanes = self.merge_df["Equipment"].value_counts().nlargest(n)
+    
+        top_airplanes.plot(kind="bar", title=f"Top {n} Airplane Models by Number of Routes")
         plt.xlabel("Airplane Model")
         plt.ylabel("Number of Routes")
         plt.show()
