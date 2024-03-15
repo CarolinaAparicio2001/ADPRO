@@ -24,7 +24,9 @@ Our repository is structured as follows:
 - `python_files/`: Contains the python code files:
     - `class_airplane.py`: Python class `Airplane` with several methods was created. All the methods used belong to this class.
     - `distance_airports.py`: There is a function called `distance_geo` that calculates the geographical distance between two points using latitude and longitude coordinates. It works independently and has robust error handling, returning 0 in case of calculation failures.
+    - `distance_function_test.py` : Python class `TestDistanceGeo` where is included the 3 unit tests for the function `distance_geo`from `distance_airports.py`.
 - `flight_data/:` Contains our datasets
+
 
 To use the functionalities provided by the `Airplane` class, follow these steps:
 
@@ -34,6 +36,18 @@ To use the functionalities provided by the `Airplane` class, follow these steps:
 
 3. Initiate the merging process by running the `merge_datasets` method provided in the `Airplane` class to extract valuable insights, identify patterns, and make data-driven decisions with the downloaded data.
 
+4. For the LLM, to have access to OPENAI_API_KEY we had to use "import os" and we deleted before uploading to git. Maybe there is need to some adjustments before these codes starts working.
+
+
+To use the functionalities provided by the `TestDistanceGeo` class, follow these steps:
+
+1. Ensure that both `distance_airports.py` and `distance_function_test.py` files are located within the `python_files/`. These files contain the implementation of the distance calculation and the corresponding unit tests, respectively.
+
+2. Make sure you installed geopy and unittest before running.
+
+2. Open a terminal in Jupyter Lab. Ensure you navigate to the directory containing the two Python files mentioned above. If you are not already in the correct directory, you can change directories using the cd command.
+
+3. In the terminal, code "python distance_function_test.py". This command will run the 3 tests defined in the TestDistanceGeo class. If everything is set up correctly, you should see output indicating the execution time and a status of "OK" meaning that all tests passed successfully.
 
 ## Airplane Class
 
@@ -64,18 +78,35 @@ The class adheres to PEP8 standards, utilizing black and pylint for code formatt
    - Usage: `airplane_instance.plot_flights_by_country(country, internal=False, cutoff_distance=500)`
 8. **aircrafts:**
    - Lists the aircraft models available in the dataset.
-   - Usage:
+   - Usage: `airplane.aircrafts()`
 9. **aircraft_info:**
    - Provides detailed information about a specific aircraft model, including its IATA code and ICAO code.
-   - Usage: 
+   - Usage: `airplane.aircraft_info()`
 10. **airport_info:**
    - Provides detailed information about a specific airport, including its ID, source airport, city, latitude, and longitude.
-   - Usage:
+   - Usage: `airplane.airport_info()`
 
-     
+
+## TestDistanceGeo Class
+
+The class adheres to PEP8 standards, utilizing black and pylint for code formatting and linting.
+
+1. **test_distance_geo_same_location** 
+- Tests distance with same airport as source and destination airport.
+
+2. **test_distance_geo_different_airports_same_country** 
+- Test distance from different airports at the same country.
+
+3. **test_distance_geo_different_countries** 
+- Test distance from airports from different countries.
+
+
+
 ## Airplane Class
 The class is PEP8 compliant, using black and pylint.
 
+## TestDistanceGeo Class
+The class is PEP8 compliant, using black and pylint.
 
 ## License
 GPL-3.0 license
