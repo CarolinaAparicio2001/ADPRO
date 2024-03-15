@@ -1,24 +1,25 @@
+#standard libraries
 import os
 import requests
-import pandas as pd
-from io import BytesIO
 from zipfile import ZipFile
-from plotnine import ggplot, aes, geom_histogram, theme_minimal, scale_fill_manual
+
+# Third-party libraries
+import pandas as pd
 import geopandas as gpd
 import matplotlib.pyplot as plt
-from distance_airports import distance_geo
 from shapely.geometry import Point, LineString, MultiPoint
+from plotnine import ggplot, aes, geom_histogram, theme_minimal, scale_fill_manual
+from io import BytesIO
 from IPython.display import display, HTML
 from langchain_openai import ChatOpenAI
 import langchain
 
+# Local application libraries
+from distance_airports import distance_geo
 
 
-class Airplane():
-    """
-    A class to download airplane data and perform analysis on it.
-    """
 
+class Airplane:
     def __init__(self):
         self.airlines_df = pd.DataFrame()
         self.airplanes_df = pd.DataFrame()
@@ -27,178 +28,116 @@ class Airplane():
         self.merge_df = pd.DataFrame()
 
     def download_data(self):
-        """
-        Checks for a 'downloads' folder and creates it if it doesn't exist.
-        Downloads flight data from a GitHub repository as a zip file, saves it,
-        extracts the contents, and creates Pandas DataFrames from the CSV files:
-        - airlines.csv
-        - airplanes.csv
-        - airports.csv
-        - routes.csv
-        """
-
         downloads_dir = "downloads"
         if not os.path.exists(downloads_dir):
             os.makedirs(downloads_dir)
-
         zip_file_path = os.path.join(downloads_dir, "flight_data.zip")
-
-        """
-        Check if the zip file was already downloaded
-        """
         if not os.path.exists(zip_file_path):
             response = requests.get(
-                "https://gitlab.com/adpro1/adpro2024/-/"
-                "raw/main/Files/flight_data.zip?inline=false",
-                stream=True,
+                "https://gitlab.com/adpro1/adpro2024/-/raw/main/Files/flight_data.zip?inline=false",
+                stream=True, timeout=10
             )
-            """
-            Ensure the request is successful
-            """
             if response.status_code == 200:
-                with open(zip_file_path, "wb") as f:
-                    f.write(response.content)
-
-        """
-        Extract files if the zip file is downloaded
-        """
+                with open(zip_file_path, "wb") as file:
+                    file.write(response.content)
         if os.path.exists(zip_file_path):
-            extraction_dir = os.path.join(os.getcwd(), downloads_dir)
-            with ZipFile(zip_file_path, "r") as zip_ref:
+            with ZipFile(zip_file_path, 'r') as zip_ref:
                 zip_ref.extractall(downloads_dir)
+                self.airlines_df = pd.read_csv(os.path.join(downloads_dir, 'airlines.csv'))
+                self.airplanes_df = pd.read_csv(os.path.join(downloads_dir, 'airplanes.csv'))
+                self.airports_df = pd.read_csv(os.path.join(downloads_dir, 'airports.csv'))
+                self.routes_df = pd.read_csv(os.path.join(downloads_dir, 'routes.csv'))
 
-                """
-                Loading data into DataFrames
-                """
-                self.airlines_df = pd.read_csv(
-                    os.path.join(downloads_dir, "airlines.csv")
-                )
-                self.airplanes_df = pd.read_csv(
-                    os.path.join(downloads_dir, "airplanes.csv")
-                )
-                self.airports_df = pd.read_csv(
-                    os.path.join(downloads_dir, "airports.csv")
-                )
-                self.routes_df = pd.read_csv(os.path.join(downloads_dir, "routes.csv"))
-
-        
-    def merge_datasets(self) -> pd.DataFrame:
-    
-        self.airlines_df = self.airlines_df.drop(self.airlines_df.columns[0], axis=1).reset_index(drop=True)
-        self.airports_df= self.airports_df.drop(self.airports_df.columns[0], axis=1).reset_index(drop=True)
-        self.airports_df = self.airports_df.drop(['Type', 'Source'], axis=1)
-        self.routes_df= self.routes_df.drop(self.routes_df.columns[0], axis=1).reset_index(drop=True)
-        self.airplanes_df= self.airplanes_df.drop(self.airplanes_df.columns[0], axis=1).reset_index(drop=True)
-
-        merge_df_1 = pd.merge(self.airports_df,self.routes_df, left_on="IATA", right_on="Source airport", how="left")
-        merge_df_1 = merge_df_1.rename(columns={"Country": "Source country","Latitude": "latitude_source","Longitude": "longitude_source"})
-        
-        merge_df = pd.merge(merge_df_1,self.airports_df[["IATA", "Country", "Latitude", "Longitude"]],left_on="Destination airport",right_on="IATA", how='left')
-        merge_df = merge_df.rename(columns={'IATA_x':"IATA", "Country": "Destination country","Latitude": "latitude_destination","Longitude": "longitude_destination"})
-        merge_df = merge_df.dropna(subset=["Source country", "Destination country"])
-        #Drop the columns that I dont need
-        merge_df.drop(columns=['IATA_y', 'DST', 'Tz database time zone', 'Airline', 'Timezone', 'Codeshare', 'Altitude'], inplace=True)
-
-        # Assign the resulting merge_df to the instance variable
-        self.merge_df = merge_df
-        
-        #print("Merge DataFrame:\n", self.merge_df.head())
-
+    def merge_datasets(self):
+        self.airlines_df.drop(columns=self.airlines_df.columns[0], inplace=True, errors='ignore')
+        self.airports_df.drop(columns=self.airports_df.columns[0], inplace=True, errors='ignore')
+        self.airports_df.drop(['Type', 'Source'], axis=1, inplace=True, errors='ignore')
+        self.routes_df.drop(columns=self.routes_df.columns[0], inplace=True, errors='ignore')
+        self.airplanes_df.drop(columns=self.airplanes_df.columns[0], inplace=True, errors='ignore')
+        merge_df_1 = pd.merge(
+            self.airports_df, self.routes_df, 
+            left_on="IATA", right_on="Source airport", 
+            how="left"
+        ).rename(columns={
+            "Country": "Source country", 
+            "Latitude": "latitude_source", 
+            "Longitude": "longitude_source"
+        })
+        self.merge_df = pd.merge(
+            merge_df_1, 
+            self.airports_df[["IATA", "Country", "Latitude", "Longitude"]], 
+            left_on="Destination airport", right_on="IATA", 
+            how='left'
+        ).rename(columns={
+            "Country": "Destination country", 
+            "Latitude": "latitude_destination", 
+            "Longitude": "longitude_destination"
+        }).dropna(subset=["Source country", "Destination country"]).drop(
+            columns=['IATA_y', 'DST', 'Tz database time zone', 'Airline', 
+                     'Timezone', 'Codeshare', 'Altitude'], 
+            errors='ignore'
+        )
         return self.merge_df
 
     def plot_airports_in_country(self, country):
-        """
-        Plot airports within the chosen country and use the ICAOs as legends.
-
-        Parameters:
-        - country (str): The name of the country where airports are to be plotted.
-        """
-        # Filter airports by the specified country
         country_airports = self.merge_df[self.merge_df["Source country"] == country]
-
-        # Exit if no airports are found in the country
         if country_airports.empty:
             print(f"No airports found in {country}.")
             return
-
-        # Load a map of the world
-        world = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
-
-        # Filter the map to only include the specified country
+        world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
         country_map = world[world["name"] == country]
-
-        # Exit if the country is not found in the map dataset
         if country_map.empty:
             print(f"Country '{country}' not found.")
             return
-
-        # Convert the filtered airports data into a GeoDataFrame
         gdf_airports = gpd.GeoDataFrame(
-            country_airports,
-            geometry=gpd.points_from_xy(
-                country_airports.Longitude, country_airports.Latitude
-            ),
+            country_airports, 
+            geometry=gpd.points_from_xy(country_airports.longitude_source, country_airports.latitude_source)
         )
-
-        # Plotting
-        _, axis = plt.subplots(figsize=(10, 10))
-        country_map.plot(ax=axis, color="lightgrey")
-        gdf_airports.plot(ax=axis, marker="o", color="red", markersize=5)
-
-        # Annotate each airport with its ICAO code
-        for _, row in gdf_airports.iterrows():
-            axis.text(row.geometry.x, row.geometry.y, row["ICAO"], fontsize=8)
-
+        fig, ax = plt.subplots(figsize=(10, 10))
+        country_map.plot(ax=ax, color='lightgrey')
+        gdf_airports.plot(ax=ax, marker='o', color='red', markersize=5)
         plt.title(f"Airports in {country}")
         plt.show()
 
     def distance_analysis(self):
-        self.merge_df["distance"] = self.merge_df.apply(
+        """
+        Performs distance analysis between source and destination airports.
+        """
+        self.merge_df['distance'] = self.merge_df.apply(
             lambda row: distance_geo(
-                row["latitude_source"],
-                row["longitude_source"],
-                row["latitude_destination"],
-                row["longitude_destination"],
+                row['latitude_source'],
+                row['longitude_source'],
+                row['latitude_destination'],
+                row['longitude_destination']
             ),
-            axis=1,
+            axis=1
         )
-
-        self.merge_df["distance"].head()
-
         distance_plot = (
-            ggplot(self.merge_df, aes(x="distance"))
-            + geom_histogram(bins=30, fill="#5496BF", color="black")
+            ggplot(self.merge_df, aes(x='distance'))
+            + geom_histogram(bins=30, fill='#5496BF', color='black')
             + theme_minimal()
-            + scale_fill_manual(
-                values=["#011526", "#C9DFF2", "#5496BF", "#75B2BF", "#025159"]
-            )
+            + scale_fill_manual(values=['#011526', '#C9DFF2', '#5496BF', '#75B2BF', '#025159'])
         )
-
         return distance_plot
 
 
     def plot_flights_by_code_airports(self, code_airport, internal=False):
-        
         """
-        This function plots flight routes originating from a specified airport. 
-        If the 'internal' parameter is set to True, it will display only domestic flights within the specified airport's country and show a detailed map of 
-        that country. 
-        If set to False, it will display all flights from the airport on a global map. 
+        Plots flight routes originating from a specified airport. If the 'internal' parameter
+        is set to True, it will display only domestic flights within the specified airport's country.
+        Otherwise, it displays all flights from the airport on a global map.
     
-        Parameters: 
-        1. 'code_airport' - a string containing the IATA or ICAO code of the source airport. 
-        2. 'internal' - a boolean flag indicating whether to plot only domestic flights (True) or all flights (False). The default value is False.
+        Parameters:
+        - code_airport (str): IATA code of the source airport.
+        - internal (bool): Flag for plotting only domestic flights; defaults to False.
         """
-            
         country_of_source = self.merge_df.loc[
             self.merge_df["Source airport"] == code_airport, "Source country"
         ].iloc[0]
-
-        
+    
         world = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
         country_geom = world[world["name"] == country_of_source].geometry.unary_union
-
-        
+    
         if internal:
             flights = self.merge_df[
                 (self.merge_df["Source airport"] == code_airport) &
@@ -206,82 +145,60 @@ class Airplane():
                 (self.merge_df["Source country"] == country_of_source)
             ]
         else:
-            flights = self.merge_df[
-                (self.merge_df["Source airport"] == code_airport)
-            ]
-
+            flights = self.merge_df[self.merge_df["Source airport"] == code_airport]
+    
         if flights.empty:
             print(f"No flights found for the specified criteria from {code_airport}.")
             return
-
-        
+    
         source_points = gpd.points_from_xy(flights.longitude_source, flights.latitude_source)
         destination_points = gpd.points_from_xy(flights.longitude_destination, flights.latitude_destination)
-        
-        
-        all_points = MultiPoint(list(source_points) + list(destination_points))
-
-        
+    
         gdf_flights = gpd.GeoDataFrame(flights, geometry=source_points)
         gdf_destinations = gpd.GeoDataFrame(flights, geometry=destination_points)
-
-        _, axis = plt.subplots(figsize=(10, 10))
-
+    
+        fig, axis = plt.subplots(figsize=(10, 10))
         if internal:
-            
             country_plot = world[world["name"] == country_of_source]
             country_plot.plot(ax=axis, color="lightgrey")
-            
-            
             minx, miny, maxx, maxy = country_geom.bounds
             axis.set_xlim(minx, maxx)
             axis.set_ylim(miny, maxy)
         else:
-           
             world.plot(ax=axis, color="lightgrey")
             world[world["name"] == country_of_source].plot(ax=axis, color="lightblue")
-
-        
+    
         gdf_flights.plot(ax=axis, marker='o', color='blue', markersize=20, label='Source Airports')
         gdf_destinations.plot(ax=axis, marker='^', color='green', markersize=20, label='Destination Airports')
-
-        
+    
         for src_point, dest_point in zip(source_points, destination_points):
-            axis.plot([src_point.x, dest_point.x], [src_point.y, dest_point.y], color="red", linewidth=1, marker='')
-
-        plt.title(f"{'Internal' if internal else ''} Flights from {code_airport}")
+            axis.plot([src_point.x, dest_point.x], [src_point.y, dest_point.y], color="red", linewidth=1)
+    
+        plt.title(f"{'Internal ' if internal else ''}Flights from {code_airport}")
         plt.legend()
         plt.show()
 
-
-    def plot_most_used_airplane_models(self, n: int = 5, countries=None):
+    def plot_most_used_airplane_models(self, n=5, countries=None):
         """
-        Plot the most used airplane models based on the number of routes.
-
+        Plots the most used airplane models based on the number of routes.
+    
         Parameters:
-            n (int): Number of airplane models to plot, that by default is 5.
-            countries (str): Specific country or list of countries to consider, by default is None.
+        - n (int): Number of airplane models to plot, defaults to 5.
+        - countries (list/str): Specific country or list of countries to consider; defaults to None.
         """
-        if countries is None:
-            # Plot most used planes by route using the entire dataset
-            top_airplanes = self.merge_df["Equipment"].value_counts().nlargest(n)
-        else:
-            # Plot most used planes by route for a specific country or list of countries
+        if countries:
             if isinstance(countries, str):
                 countries = [countries]
-
-            filtered_routes = self.merge_df[
-                self.merge_df["Source country"].isin(countries)
-            ]
+            filtered_routes = self.merge_df[self.merge_df["Source country"].isin(countries)]
             top_airplanes = filtered_routes["Equipment"].value_counts().nlargest(n)
-
-        top_airplanes.plot(
-            kind="bar", title=f"Top {n} Airplane Models by Number of Routes"
-        )
+        else:
+            top_airplanes = self.merge_df["Equipment"].value_counts().nlargest(n)
+    
+        top_airplanes.plot(kind="bar", title=f"Top {n} Airplane Models by Number of Routes")
         plt.xlabel("Airplane Model")
         plt.ylabel("Number of Routes")
         plt.show()
-
+    
 
     def plot_flights_by_country(self, country, internal=False, cutoff_distance=500):
                 """
@@ -374,14 +291,17 @@ class Airplane():
                             route = LineString([Point(row['longitude_source'], row['latitude_source']), Point(row['longitude_destination'], row['latitude_destination'])])
                             gpd.GeoDataFrame(geometry=[route]).plot(ax=axis, color=color, linewidth=2)
 
-                    #Explaination to put here 
+                    # This section compares the potential carbon emission reductions between short-haul flights and equivalent train rides.
                     
-                    #Supposing that a domestic flight emits 246 grams per kilometer, calculate the total kilometer of short-haul flights times 246
+                    # Supposing that a domestic flight emits 246 grams per kilometer, calculate the total kilometer of short-haul flights times 246
                     total_emissions_flight = total_short_haul_distance * 246 
-
-                    #Supposing that short-haul flights under 500 km can emit three times as much CO2 as a train ride covering the same distance
+                    
+                    # Next, we consider the environmental impact of short-haul flights compared to train rides. 
+                    # Research indicates that short-haul flights covering a distance of less than 500 km can produce three times more CO2 emissions than a train ride over the same distance. 
+                    # Hence, to estimate the emissions from equivalent train rides, we divide the total emissions from short-haul flights by 3. 
                     total_emissions_train = total_emissions_flight /3
 
+                    # Shows potential carbon reduction by favoring trains over short-haul flights.
                     co2_reductions = (total_emissions_flight - total_emissions_train)/1000 
         
                     # Annotate total information about short-haul flights
