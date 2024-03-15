@@ -601,4 +601,4 @@ class Airplane:
                 recommended_list = all_airport_names[:5]
                 print("Here are some recommended aircraft names to choose from:")
                 for recommend in recommended_list:
-                    print(f"- {recommend}")
+                    print(f"- {recommend}") 
