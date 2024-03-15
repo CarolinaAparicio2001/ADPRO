@@ -3,6 +3,7 @@ from geopy.distance import geodesic
 from distance_airports import distance_geo 
 
 class TestDistanceGeo(unittest.TestCase):
+    """A test suite for the distance_geo function."""
 
     def test_distance_geo_same_location(self):
         """Test the distance_geo function with the same location, should return 0."""
