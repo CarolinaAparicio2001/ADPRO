@@ -23,9 +23,6 @@ from langchain_openai import ChatOpenAI
 # Local application libraries
 from distance_airports import distance_geo
 
-# Local application libraries
-from distance_airports import distance_geo
-
 
 class Airplane:
     """
