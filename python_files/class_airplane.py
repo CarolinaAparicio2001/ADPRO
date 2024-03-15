@@ -149,6 +149,13 @@ class Airplane:
         return self.merge_df
 
     def plot_airports_in_country(self, country):
+        """
+        Plot the locations of airports within a specified country on a map.
+
+        Parameters
+        - country(str): The name of the country for which airports are to be plotted.
+        
+        """
         country_airports = self.merge_df[self.merge_df["Source country"] == country]
         if country_airports.empty:
             print(f"No airports found in {country}.")
