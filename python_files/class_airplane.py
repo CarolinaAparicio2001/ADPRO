@@ -5,7 +5,7 @@ Description: This module defines the Airplane class for downloading airplane dat
 """
 
 # standard libraries
-import os
+import os 
 from zipfile import ZipFile
 import random
 from difflib import get_close_matches
@@ -510,7 +510,7 @@ class Airplane:
 
     def aircraft_info(self, aircraft_name):
         """
-        Plot the information about aircaft name.
+        Plot the information about aircaft name. 
 
         Parameters:
             aircraft_name (str): The name of the aircraft for which information is to be retrieved.
