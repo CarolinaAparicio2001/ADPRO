@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 from distance_airports import distance_geo
 from shapely.geometry import Point, LineString, MultiPoint
 from IPython.display import display, HTML
+from langchain_openai import ChatOpenAI
+import langchain
 
 
 
@@ -95,7 +97,7 @@ class Airplane():
         merge_df = merge_df.rename(columns={'IATA_x':"IATA", "Country": "Destination country","Latitude": "latitude_destination","Longitude": "longitude_destination"})
         merge_df = merge_df.dropna(subset=["Source country", "Destination country"])
         #Drop the columns that I dont need
-        merge_df.drop(columns=['IATA_y'], inplace=True)
+        merge_df.drop(columns=['IATA_y', 'DST', 'Tz database time zone', 'Airline', 'Timezone', 'Codeshare', 'Altitude'], inplace=True)
 
         # Assign the resulting merge_df to the instance variable
         self.merge_df = merge_df
@@ -281,7 +283,7 @@ class Airplane():
         plt.show()
 
 
-    def plot_flights_by_country(self, country, internal=False, cutoff_distance=1000):
+    def plot_flights_by_country(self, country, internal=False, cutoff_distance=500):
                 """
                 Plot the map flight routes between domestic and international flights from source to destination airports.
         
@@ -332,11 +334,9 @@ class Airplane():
         
                             route = LineString([Point(row['longitude_source'], row['latitude_source']), Point(row['longitude_destination'], row['latitude_destination'])])
                             gpd.GeoDataFrame(geometry=[route]).plot(ax=axis, color=color, linewidth=2)
-
-                    co2_reductions = total_short_haul_distance * 0.86
         
                     # Annotate total information about short-haul flights
-                    plt.annotate(f'Total short-haul flights: {short_haul_count}\nTotal short-haul distance: {total_short_haul_distance:.2f} km\nCarbon emissions potencial reductions: {co2_reductions} km', xy=(0.07, 1.2), xycoords='axes fraction', fontsize=12, backgroundcolor='white')
+                    plt.annotate(f'Total short-haul flights: {short_haul_count}\nTotal short-haul distance: {total_short_haul_distance:.2f} km', xy=(0.07, 1.2), xycoords='axes fraction', fontsize=12, backgroundcolor='white')
         
                     plt.legend()
                     plt.title(f"Internal flights within {country} (Cutoff: {cutoff_distance}km)")
@@ -373,10 +373,24 @@ class Airplane():
         
                             route = LineString([Point(row['longitude_source'], row['latitude_source']), Point(row['longitude_destination'], row['latitude_destination'])])
                             gpd.GeoDataFrame(geometry=[route]).plot(ax=axis, color=color, linewidth=2)
+
+                    #Explaination to put here 
+                    
+                    #Supposing that a domestic flight emits 246 grams per kilometer, calculate the total kilometer of short-haul flights times 246
+                    total_emissions_flight = total_short_haul_distance * 246 
+
+                    #Supposing that short-haul flights under 500 km can emit three times as much CO2 as a train ride covering the same distance
+                    total_emissions_train = total_emissions_flight /3
+
+                    co2_reductions = (total_emissions_flight - total_emissions_train)/1000 
+        
+                    # Annotate total information about short-haul flights
+                    plt.annotate(f'Total short-haul flights: {short_haul_count}\nTotal short-haul distance: {total_short_haul_distance:.2f} km\nCarbon emissions potential reductions: {round(co2_reductions,2)} kg of CO2', xy=(0.07, 1.2), xycoords='axes fraction', fontsize=12, backgroundcolor='white')
         
                     plt.title(f"All flights from {country}")
                     plt.legend()
                     plt.show()
+
 
     def aircrafts(self):
         """
