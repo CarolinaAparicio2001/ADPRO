@@ -1,18 +1,25 @@
+"""
+Module: class_airplane
+
+Description: This module defines the Airplane class for downloading airplane data and performing analysis on it.
+"""
+
 # standard libraries
 import os
-# from io import BytesIO
 from zipfile import ZipFile
+import random
+from difflib import get_close_matches
 import requests
-##
+
+
 # Third-party libraries
 import pandas as pd
 import geopandas as gpd
 import matplotlib.pyplot as plt
-from shapely.geometry import Point, LineString, MultiPoint
+from shapely.geometry import Point, LineString
 from plotnine import ggplot, aes, geom_histogram, theme_minimal, scale_fill_manual
-from IPython.display import display, HTML
 from langchain_openai import ChatOpenAI
-import langchain
+
 
 # Local application libraries
 from distance_airports import distance_geo
@@ -55,6 +62,7 @@ class Airplane:
                 "https://gitlab.com/adpro1/adpro2024/-/"
                 "raw/main/Files/flight_data.zip?inline=false",
                 stream=True,
+                timeout=10,
             )
             """
             Ensure the request is successful
@@ -266,8 +274,6 @@ class Airplane:
         destination_points = gpd.points_from_xy(
             flights.longitude_destination, flights.latitude_destination
         )
-
-        all_points = MultiPoint(list(source_points) + list(destination_points))
 
         gdf_flights = gpd.GeoDataFrame(flights, geometry=source_points)
         gdf_destinations = gpd.GeoDataFrame(flights, geometry=destination_points)
@@ -561,19 +567,7 @@ class Airplane:
         airport_models = self.merge_df["Name"].tolist()
 
         if airport_name in airport_models:
-            # Retrieve information for the specified airport_name
-            unique_info = self.merge_df[self.merge_df["Name"] == airport_name][
-                [
-                    "Airport ID",
-                    "Name",
-                    "Source airport",
-                    "City",
-                    "latitude_source",
-                    "longitude_source",
-                ]
-            ].drop_duplicates(subset=["Name"])
             print(f"Airport Information for {airport_name}:")
-            # print(unique_info.to_string(index=False))
 
             # Construct a query for the language model
             query = f"Provide details for the airport named {airport_name}. Include information such as Airport ID, Source airport, City, Latitude, and Longitude."
