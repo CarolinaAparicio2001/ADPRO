@@ -145,13 +145,13 @@ class Airplane:
 
         return self.merge_df
 
+    
     def plot_airports_in_country(self, country):
         """
         Plot the locations of airports within a specified country on a map.
 
-        Parameters
-        - country(str): The name of the country for which airports are to be plotted.
-        
+        Parameters:
+        - country (str): The name of the country for which airports are to be plotted.
         """
         country_airports = self.merge_df[self.merge_df["Source country"] == country]
         if country_airports.empty:
@@ -163,14 +163,19 @@ class Airplane:
             print(f"Country '{country}' not found.")
             return
         gdf_airports = gpd.GeoDataFrame(
-            country_airports, 
+            country_airports,
             geometry=gpd.points_from_xy(country_airports.longitude_source, country_airports.latitude_source)
         )
         fig, ax = plt.subplots(figsize=(10, 10))
         country_map.plot(ax=ax, color='lightgrey')
-        gdf_airports.plot(ax=ax, marker='o', color='red', markersize=5)
+        gdf_airports.plot(ax=ax, marker='o', color='red', markersize=5, label='Airports')
+
+        for idx, row in gdf_airports.iterrows():
+            ax.text(row.geometry.x, row.geometry.y, row["Source airport"], fontsize=8)
         plt.title(f"Airports in {country}")
+        plt.legend()
         plt.show()
+
 
     def distance_analysis(self):
         """
@@ -545,7 +550,7 @@ class Airplane:
                 all_airport_names = self.merge_df["Name"].tolist()
                 random.shuffle(all_airport_names)  # Shuffle the list in place
 
-                # Select the top 5 (or however many you prefer) from the shuffled list
+                # Select the top 3 (or however many you prefer) from the shuffled list
                 recommended_list = all_airport_names[:5]
                 print("Here are some recommended aircraft names to choose from:")
                 for recommend in recommended_list:
