@@ -92,13 +92,13 @@ The class adheres to PEP8 standards, utilizing black and pylint for code formatt
 The class adheres to PEP8 standards, utilizing black and pylint for code formatting and linting.
 
 1. **test_distance_geo_same_location** 
-- Tests distance with same airport as source and destination airport.
+   - Tests distance with same airport as source and destination airport.
 
 2. **test_distance_geo_different_airports_same_country** 
-- Test distance from different airports at the same country.
+   - Test distance from different airports at the same country.
 
 3. **test_distance_geo_different_countries** 
-- Test distance from airports from different countries.
+   - Test distance from airports from different countries.
 
 
 
