@@ -5,7 +5,7 @@ Description: This module defines the Airplane class for downloading airplane dat
 """
 
 # standard libraries
-import os 
+import os
 from zipfile import ZipFile
 import random
 from difflib import get_close_matches
@@ -28,6 +28,7 @@ class Airplane:
     """
     A class to download airplane data and perform analysis on it.
     """
+
 
 class Airplane:
     def __init__(self):
@@ -53,12 +54,18 @@ class Airplane:
                 with open(zip_file_path, "wb") as file:
                     file.write(response.content)
         if os.path.exists(zip_file_path):
-            with ZipFile(zip_file_path, 'r') as zip_ref:
+            with ZipFile(zip_file_path, "r") as zip_ref:
                 zip_ref.extractall(downloads_dir)
-                self.airlines_df = pd.read_csv(os.path.join(downloads_dir, 'airlines.csv'))
-                self.airplanes_df = pd.read_csv(os.path.join(downloads_dir, 'airplanes.csv'))
-                self.airports_df = pd.read_csv(os.path.join(downloads_dir, 'airports.csv'))
-                self.routes_df = pd.read_csv(os.path.join(downloads_dir, 'routes.csv'))
+                self.airlines_df = pd.read_csv(
+                    os.path.join(downloads_dir, "airlines.csv")
+                )
+                self.airplanes_df = pd.read_csv(
+                    os.path.join(downloads_dir, "airplanes.csv")
+                )
+                self.airports_df = pd.read_csv(
+                    os.path.join(downloads_dir, "airports.csv")
+                )
+                self.routes_df = pd.read_csv(os.path.join(downloads_dir, "routes.csv"))
 
                 """
                 Loading data into DataFrames
@@ -145,7 +152,6 @@ class Airplane:
 
         return self.merge_df
 
-    
     def plot_airports_in_country(self, country):
         """
         Plot the locations of airports within a specified country on a map.
@@ -157,18 +163,22 @@ class Airplane:
         if country_airports.empty:
             print(f"No airports found in {country}.")
             return
-        world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
+        world = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
         country_map = world[world["name"] == country]
         if country_map.empty:
             print(f"Country '{country}' not found.")
             return
         gdf_airports = gpd.GeoDataFrame(
             country_airports,
-            geometry=gpd.points_from_xy(country_airports.longitude_source, country_airports.latitude_source)
+            geometry=gpd.points_from_xy(
+                country_airports.longitude_source, country_airports.latitude_source
+            ),
         )
         fig, ax = plt.subplots(figsize=(10, 10))
-        country_map.plot(ax=ax, color='lightgrey')
-        gdf_airports.plot(ax=ax, marker='o', color='red', markersize=5, label='Airports')
+        country_map.plot(ax=ax, color="lightgrey")
+        gdf_airports.plot(
+            ax=ax, marker="o", color="red", markersize=5, label="Airports"
+        )
 
         for idx, row in gdf_airports.iterrows():
             ax.text(row.geometry.x, row.geometry.y, row["Source airport"], fontsize=8)
@@ -176,25 +186,26 @@ class Airplane:
         plt.legend()
         plt.show()
 
-
     def distance_analysis(self):
         """
         Performs distance analysis between source and destination airports.
         """
         self.merge_df["distance"] = self.merge_df.apply(
             lambda row: distance_geo(
-                row['latitude_source'],
-                row['longitude_source'],
-                row['latitude_destination'],
-                row['longitude_destination']
+                row["latitude_source"],
+                row["longitude_source"],
+                row["latitude_destination"],
+                row["longitude_destination"],
             ),
-            axis=1
+            axis=1,
         )
         distance_plot = (
-            ggplot(self.merge_df, aes(x='distance'))
-            + geom_histogram(bins=30, fill='#5496BF', color='black')
+            ggplot(self.merge_df, aes(x="distance"))
+            + geom_histogram(bins=30, fill="#5496BF", color="black")
             + theme_minimal()
-            + scale_fill_manual(values=['#011526', '#C9DFF2', '#5496BF', '#75B2BF', '#025159'])
+            + scale_fill_manual(
+                values=["#011526", "#C9DFF2", "#5496BF", "#75B2BF", "#025159"]
+            )
         )
         return distance_plot
 
@@ -238,7 +249,7 @@ class Airplane:
 
         gdf_flights = gpd.GeoDataFrame(flights, geometry=source_points)
         gdf_destinations = gpd.GeoDataFrame(flights, geometry=destination_points)
-    
+
         fig, axis = plt.subplots(figsize=(10, 10))
         if internal:
 
@@ -280,7 +291,7 @@ class Airplane:
     def plot_most_used_airplane_models(self, n: int = 5, countries=None):
         """
         Plots the most used airplane models based on the number of routes.
-    
+
         Parameters:
         - n (int): Number of airplane models to plot, defaults to 5.
         - countries (list/str): Specific country or list of countries to consider; defaults to None.
@@ -288,12 +299,16 @@ class Airplane:
         if countries:
             if isinstance(countries, str):
                 countries = [countries]
-            filtered_routes = self.merge_df[self.merge_df["Source country"].isin(countries)]
+            filtered_routes = self.merge_df[
+                self.merge_df["Source country"].isin(countries)
+            ]
             top_airplanes = filtered_routes["Equipment"].value_counts().nlargest(n)
         else:
             top_airplanes = self.merge_df["Equipment"].value_counts().nlargest(n)
-    
-        top_airplanes.plot(kind="bar", title=f"Top {n} Airplane Models by Number of Routes")
+
+        top_airplanes.plot(
+            kind="bar", title=f"Top {n} Airplane Models by Number of Routes"
+        )
         plt.xlabel("Airplane Model")
         plt.ylabel("Number of Routes")
         plt.show()
@@ -463,7 +478,7 @@ class Airplane:
 
     def aircraft_info(self, aircraft_name):
         """
-        Plot the information about aircaft name. 
+        Plot the information about aircaft name.
 
         Parameters:
             aircraft_name (str): The name of the aircraft for which information is to be retrieved.
@@ -554,4 +569,4 @@ class Airplane:
                 recommended_list = all_airport_names[:5]
                 print("Here are some recommended aircraft names to choose from:")
                 for recommend in recommended_list:
-                    print(f"- {recommend}") 
+                    print(f"- {recommend}")
