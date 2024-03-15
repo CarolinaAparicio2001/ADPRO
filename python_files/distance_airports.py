@@ -3,7 +3,7 @@ Module: distance_airports
 Description: This module provides functionality related to calculating distances between airports.
 """
 
-from geopy.distance import geodesic
+from geopy.distance import geodesic 
 
 def distance_geo(latitude_source, longitude_source, latitude_destination, longitude_destination):
     """ 
