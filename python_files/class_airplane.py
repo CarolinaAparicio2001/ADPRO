@@ -10,7 +10,6 @@ from zipfile import ZipFile
 import random
 from difflib import get_close_matches
 import requests
-import numpy
 
 
 # Third-party libraries
