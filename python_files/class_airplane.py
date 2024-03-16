@@ -39,6 +39,9 @@ class Airplane:
         self.merge_df = pd.DataFrame()
 
     def download_data(self):
+        """
+        Download the flight data and save it to a folder called downloads.
+        """
         downloads_dir = "downloads"
         if not os.path.exists(downloads_dir):
             os.makedirs(downloads_dir)
@@ -131,7 +134,7 @@ class Airplane:
             }
         )
         merge_df = merge_df.dropna(subset=["Source country", "Destination country"])
-
+        
         merge_df.drop(
             columns=[
                 "IATA_y",
@@ -145,6 +148,7 @@ class Airplane:
             inplace=True,
         )
 
+        
         self.merge_df = merge_df
 
         return self.merge_df
@@ -321,9 +325,8 @@ class Airplane:
             cutoff_distance (float): Threshold in km to differentiate between short-haul and long-haul flights.
         """
 
-        # Ensure the distance column is available
         if "distance" not in self.merge_df.columns:
-            self.distance_analysis()  # Compute distances if not already done
+            self.distance_analysis()  
 
         if internal:
             internal_routes = self.merge_df[
@@ -399,7 +402,6 @@ class Airplane:
             _, axis = plt.subplots(figsize=(10, 10))
             world.plot(ax=axis, color="lightgrey")
 
-
             total_short_haul_distance = 0
             no_double_routes = set()
             short_haul_count = 0
@@ -430,15 +432,7 @@ class Airplane:
                     gpd.GeoDataFrame(geometry=[route]).plot(
                         ax=axis, color=color, linewidth=2
                     )
-
-            '''
-            This section compares the potential carbon emission reductions between short-haul flights and equivalent train rides.
-            Supposing that a domestic flight emits 246 grams per kilometer, calculate the total kilometer of short-haul flights times 246.
-            Next, we consider the environmental impact of short-haul flights compared to train rides.
-            Research indicates that short-haul flights covering a distance of less than 500 km can produce three times more CO2 emissions than a train ride over the same distance.
-            Hence, to estimate the emissions from equivalent train rides, we divide the total emissions from short-haul flights by 3.
-            '''
-
+            
             total_emissions_flight = total_short_haul_distance * 246
             
             total_emissions_train = total_emissions_flight / 3
@@ -494,6 +488,7 @@ class Airplane:
             print(result.content)
 
         else:
+            
             close_matches = get_close_matches(
                 aircraft_name, aircraft_models, n=5, cutoff=0.3
             )
@@ -502,10 +497,12 @@ class Airplane:
                 for match in close_matches:
                     print(f"- {match}")
             else:
+                
                 print(f"No close matches found for '{aircraft_name}'.")
 
+          
                 all_aircraft_names = self.airplanes_df["Name"].tolist()
-                random.shuffle(all_aircraft_names)  # Shuffle the list in place
+                random.shuffle(all_aircraft_names) 
 
                 recommended_list = all_aircraft_names[:5]
                 print("Here are some recommended aircraft names to choose from:")
@@ -523,7 +520,7 @@ class Airplane:
 
         if airport_name in airport_models:
             print(f"Airport Information for {airport_name}:")
-
+          
             query = f"Provide details for the airport named {airport_name}. Include information such as Airport ID, Source airport, City, Latitude, and Longitude."
 
             llm = ChatOpenAI(temperature=0.1)
@@ -541,14 +538,12 @@ class Airplane:
                 for match in close_matches:
                     print(f"- {match}")
             else:
-               
+                
                 print(f"No close matches found for '{airport_name}'.")
 
-                
                 all_airport_names = self.merge_df["Name"].tolist()
-                random.shuffle(all_airport_names)  # Shuffle the list in place
+                random.shuffle(all_airport_names) 
 
-                
                 recommended_list = all_airport_names[:5]
                 print("Here are some recommended aircraft names to choose from:")
                 for recommend in recommended_list:
