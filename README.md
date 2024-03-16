@@ -20,11 +20,16 @@ We will be using data from [International Air Transport Association](https://www
 
 Our repository is structured as follows:
 
+<<<<<<< HEAD
 - In the main directory, you can find:
     -  our showcase notebook ```showcase_notebook.ipynb```. It contains an analysis of the data and showcases our findings.
     -  ```environment.yml```. The YAML file contains a list of all the essential dependencies required to run our project.
     -  ```gitignore```. This file contains patterns for Git to ignore, specifically for Python projects. It excludes files like byte-compiled code, log files, and local configurations to maintain a clean repository.
 - `docs/`: Contains the documentation files generated with Sphinx:
+=======
+- In the main directory, you can find our showcase notebook ```showcase_notebook.ipynb```. It contains an analysis of the data and showcases our findings.
+- - `docs/`: Contains the documentation files generated with Sphinx:
+>>>>>>> 306f23d2c9baece30212d978206e075de23d5fc7
   - `class_airplane.rst`: Provides a detailed explanation of the `Airplane` class, outlining the methods for downloading and analyzing airplane data, including retrieving information on specific aircraft and airports.
   - `conf.py`: This file contains key configurations essential for customizing Sphinx documentation's appearance and structure.
   - `distance_airports.rst`: This document explains the distance_airports module, including its function to compute the geodesic distance between airports and its usage scenarios.
@@ -49,6 +54,7 @@ To use the functionalities provided by the `Airplane` class, follow these steps:
 
 4. For the LLM, to have access to OPENAI_API_KEY we had to use "import os" and we deleted before uploading to git. Maybe there is need to some adjustments before these codes starts working.
 
+<<<<<<< HEAD
 5. Run the following command to create a new environment named `environment` using the provided `environment.yml`:
    ```bash
    conda env create -f environment.yml
@@ -69,6 +75,15 @@ To use the functionalities provided by the `Airplane` class, follow these steps:
    ```bash
     cd docs
     make html
+=======
+5. To generate and view the project´s documentation ensure you have Sphinx installed. If not already installed, use pip:
+   ```python
+   pip install sphinx
+   ```
+6. To access the documentation, go to the `docs` folder and execute the command.
+   ```python
+   make html
+>>>>>>> 306f23d2c9baece30212d978206e075de23d5fc7
    ```
 
 To use the functionalities provided by the `TestDistanceGeo` class, follow these steps:
@@ -81,6 +96,7 @@ To use the functionalities provided by the `TestDistanceGeo` class, follow these
 
 4. In the terminal, code "python distance_function_test.py". This command will run the 3 tests defined in the TestDistanceGeo class. If everything is set up correctly, you should see output indicating the execution time and a status of "OK" meaning that all tests passed successfully.
 
+<<<<<<< HEAD
 
 ## Airplane Class
 
@@ -141,10 +157,75 @@ The class is PEP8 compliant, using black and pylint.
 ## TestDistanceGeo Class
 The class is PEP8 compliant, using black and pylint.
 
+=======
+## Airplane Class
+
+The class adheres to PEP8 standards, utilizing black and pylint for code formatting and linting.
+
+```Airplane has several methods:```
+
+1. **download_data:**
+   -  Downloads flight data from GitHub, saves it to a download folder and creates Pandas DataFrames for airlines, airplanes, airports, and routes.
+   -  Usage: `airplane.download_data()`
+2. **merge_datasets:**
+   -  Merges the various datasets into a single DataFrame, preparing it for analysis.
+   -  Usage: `airplane.merge_datasets()`
+3. **plot_airports_in_country:**
+   - Plots all airports within a specified country, indicating their locations on a national map.
+   - Usage: `airplane.plot_airports_in_country(country)`
+4. **distance_analysis:**
+   - Calculates the geographical distance between source and destination airports and creates a histogram to visualize the distribution of these distances.
+   - Usage: `airplane.distance_analysis()`
+5. **plot_flights_by_code_airports:**
+   - Visualizes the number of flights originating from a specific airport, providing flexibility to focus on either domestic or all flights.
+   - Usage: `airplane.plot_flights_by_code_airports(code_airport, internal=False)`
+6. **plot_most_used_airplane_models:**
+   - Displays a bar chart of the most frequently used airplane models in the dataset or within a specified set of countries.
+   - Usage: `airplane.plot_most_used_airplane_models(countries = None)`
+7. **plot_flights_by_country:**
+   - This method presents flight distribution from a specified country and allows a focus on domestic flights.It calculates carbon emissions reductions for short-haul flights, providing insights into the environmental impact of air transportation.
+   - Usage: `airplane.plot_flights_by_country(country, internal=False, cutoff_distance=500)`
+8. **aircrafts:**
+   - Lists the aircraft models available in the dataset.
+   - Usage: `airplane.aircrafts()`
+9. **aircraft_info:**
+   - Provides detailed information about a specific aircraft model, including its IATA code and ICAO code.
+   - Usage: `airplane.aircraft_info(aircraft_name)`
+10. **airport_info:**
+   - Provides detailed information about a specific airport, including its ID, source airport, city, latitude, and longitude.
+   - Usage: `airplane.airport_info(airport_name)`
+
+
+## TestDistanceGeo Class
+
+The class adheres to PEP8 standards, utilizing black and pylint for code formatting and linting.
+
+1. **test_distance_geo_same_location:** 
+   - Tests distance with same airport as source and destination airport.
+
+2. **test_distance_geo_different_airports_same_country:** 
+   - Test distance from different airports at the same country.
+
+3. **test_distance_geo_different_countries:** 
+   - Test distance from airports from different countries.
+
+
+## Airplane Class
+The class is PEP8 compliant, using black and pylint.
+
+## TestDistanceGeo Class
+The class is PEP8 compliant, using black and pylint.
+
+## Documentation
+For detailed documentation, please refer to the [Project Icaras Documentation](docs/_build/html/index.html)
+>>>>>>> 306f23d2c9baece30212d978206e075de23d5fc7
 
 ## License
 GPL-3.0 license
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 306f23d2c9baece30212d978206e075de23d5fc7
 ## Project Status
 Finished
