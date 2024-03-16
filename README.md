@@ -20,8 +20,11 @@ We will be using data from [International Air Transport Association](https://www
 
 Our repository is structured as follows:
 
-- In the main directory, you can find our showcase notebook ```showcase_notebook.ipynb```. It contains an analysis of the data and showcases our findings.
-- - `docs/`: Contains the documentation files generated with Sphinx:
+- In the main directory, you can find:
+    -  our showcase notebook ```showcase_notebook.ipynb```. It contains an analysis of the data and showcases our findings.
+    -  ```environment.yml```. The YAML file contains a list of all the essential dependencies required to run our project.
+    -  ```gitignore```. This file contains patterns for Git to ignore, specifically for Python projects. It excludes files like byte-compiled code, log files, and local configurations to maintain a clean repository.
+- `docs/`: Contains the documentation files generated with Sphinx:
   - `class_airplane.rst`: Provides a detailed explanation of the `Airplane` class, outlining the methods for downloading and analyzing airplane data, including retrieving information on specific aircraft and airports.
   - `conf.py`: This file contains key configurations essential for customizing Sphinx documentation's appearance and structure.
   - `distance_airports.rst`: This document explains the distance_airports module, including its function to compute the geodesic distance between airports and its usage scenarios.
@@ -46,13 +49,26 @@ To use the functionalities provided by the `Airplane` class, follow these steps:
 
 4. For the LLM, to have access to OPENAI_API_KEY we had to use "import os" and we deleted before uploading to git. Maybe there is need to some adjustments before these codes starts working.
 
-5. To generate and view the project´s documentation ensure you have Sphinx installed. If not already installed, use pip:
-   ```python
+5. Run the following command to create a new environment named `environment` using the provided `environment.yml`:
+   ```bash
+   conda env create -f environment.yml
+   ```
+6. List all available Conda environments to confirm that environment has been created successfully:
+   ```bash
+   conda info --envs
+   ```
+7. Once confirmed, activate the new environment with:
+   ```bash
+   conda activate environment
+   ```
+9. To generate and view the project´s documentation ensure you have Sphinx installed. If not already installed, use pip:
+   ```bash
    pip install sphinx
    ```
-6. To access the documentation, go to the `docs` folder and execute the command.
-   ```python
-   make html
+10. To access the documentation, go to the `docs` folder and execute the command.
+   ```bash
+    cd docs
+    make html
    ```
 
 To use the functionalities provided by the `TestDistanceGeo` class, follow these steps:
@@ -64,6 +80,7 @@ To use the functionalities provided by the `TestDistanceGeo` class, follow these
 3. Open a terminal in Jupyter Lab. Ensure you navigate to the directory containing the two Python files mentioned above. If you are not already in the correct directory, you can change directories using the cd command.
 
 4. In the terminal, code "python distance_function_test.py". This command will run the 3 tests defined in the TestDistanceGeo class. If everything is set up correctly, you should see output indicating the execution time and a status of "OK" meaning that all tests passed successfully.
+
 
 ## Airplane Class
 
@@ -120,14 +137,14 @@ The class adheres to PEP8 standards, utilizing black and pylint for code formatt
 ## Airplane Class
 The class is PEP8 compliant, using black and pylint.
 
+
 ## TestDistanceGeo Class
 The class is PEP8 compliant, using black and pylint.
 
-## Documentation
-For detailed documentation, please refer to the [Project Icaras Documentation](docs/_build/html/index.html)
 
 ## License
 GPL-3.0 license
+
 
 ## Project Status
 Finished
