@@ -39,6 +39,9 @@ class Airplane:
         self.merge_df = pd.DataFrame()
 
     def download_data(self):
+        """
+        Download the flight data and save it to a folder called downloads.
+        """
         downloads_dir = "downloads"
         if not os.path.exists(downloads_dir):
             os.makedirs(downloads_dir)
@@ -435,21 +438,13 @@ class Airplane:
                     gpd.GeoDataFrame(geometry=[route]).plot(
                         ax=axis, color=color, linewidth=2
                     )
-
-            # This section compares the potential carbon emission reductions between short-haul flights and equivalent train rides.
-
-            # Supposing that a domestic flight emits 246 grams per kilometer, calculate the total kilometer of short-haul flights times 246
+            
             total_emissions_flight = total_short_haul_distance * 246
-
-            # Next, we consider the environmental impact of short-haul flights compared to train rides.
-            # Research indicates that short-haul flights covering a distance of less than 500 km can produce three times more CO2 emissions than a train ride over the same distance.
-            # Hence, to estimate the emissions from equivalent train rides, we divide the total emissions from short-haul flights by 3.
+            
             total_emissions_train = total_emissions_flight / 3
 
-            # Shows potential carbon reduction by favoring trains over short-haul flights.
             co2_reductions = (total_emissions_flight - total_emissions_train) / 1000
 
-            # Annotate total information about short-haul flights
             plt.annotate(
                 f"Total short-haul flights: {short_haul_count}\nTotal short-haul distance: {total_short_haul_distance:.2f} km\nCarbon emissions potential reductions: {round(co2_reductions,2)} kg of CO2",
                 xy=(0.07, 1.2),
@@ -470,7 +465,7 @@ class Airplane:
         """
         column_names = self.airplanes_df.columns
         print("Column names in airplanes_df:", column_names)
-        # Assuming 'Name' is the column containing aircraft models in self.airplane_df
+
         aircraft_models = self.airplanes_df["Name"].tolist()
         print("List of Aircraft Models:")
         for model in aircraft_models:
@@ -485,25 +480,21 @@ class Airplane:
         """
         aircraft_models = self.airplanes_df["Name"].tolist()
 
-        # Check if the provided aircraft_name is in the list
         if aircraft_name in aircraft_models:
-            # Retrieve information for the specified aircraft_name
+            
             query = f"Aircraft Information for {aircraft_name}:"
             query += f"\nName: {aircraft_name}"
             query += f"\nIATA code: {self.airplanes_df.loc[self.airplanes_df['Name'] == aircraft_name, 'IATA code'].iloc[0]}"
             query += f"\nICAO code: {self.airplanes_df.loc[self.airplanes_df['Name'] == aircraft_name, 'ICAO code'].iloc[0]}"
 
-            # Create an instance of ChatOpenAI with a low temperature for focused responses
             llm = ChatOpenAI(temperature=0.1)
 
-            # Invoke the LLM with the query
             result = llm.invoke(query)
 
-            # Print the LLM-generated content as a Markdown table
             print(result.content)
 
         else:
-            # Attempt to find close matches
+            
             close_matches = get_close_matches(
                 aircraft_name, aircraft_models, n=5, cutoff=0.3
             )
@@ -512,14 +503,13 @@ class Airplane:
                 for match in close_matches:
                     print(f"- {match}")
             else:
-                # If no close matches found, suggest a generic list of recommended aircraft names
+                
                 print(f"No close matches found for '{aircraft_name}'.")
 
-                # Shuffle the list of aircraft names to ensure a different subset is selected each time
+          
                 all_aircraft_names = self.airplanes_df["Name"].tolist()
-                random.shuffle(all_aircraft_names)  # Shuffle the list in place
+                random.shuffle(all_aircraft_names) 
 
-                # Select the top 5 (or however many you prefer) from the shuffled list
                 recommended_list = all_aircraft_names[:5]
                 print("Here are some recommended aircraft names to choose from:")
                 for recommend in recommended_list:
@@ -536,20 +526,16 @@ class Airplane:
 
         if airport_name in airport_models:
             print(f"Airport Information for {airport_name}:")
-
-            # Construct a query for the language model
+          
             query = f"Provide details for the airport named {airport_name}. Include information such as Airport ID, Source airport, City, Latitude, and Longitude."
 
-            # Create an instance of ChatOpenAI with a low temperature for focused responses
             llm = ChatOpenAI(temperature=0.1)
 
-            # Invoke the LLM with the query
             result = llm.invoke(query)
 
-            # Print the LLM-generated content as a Markdown table
             print(result.content)
         else:
-            # Attempt to find close matches
+ 
             close_matches = get_close_matches(
                 airport_name, airport_models, n=5, cutoff=0.3
             )
@@ -558,14 +544,12 @@ class Airplane:
                 for match in close_matches:
                     print(f"- {match}")
             else:
-                # If no close matches found, suggest a generic list of recommended aircraft names
+                
                 print(f"No close matches found for '{airport_name}'.")
 
-                # Shuffle the list of aircraft names to ensure a different subset is selected each time
                 all_airport_names = self.merge_df["Name"].tolist()
-                random.shuffle(all_airport_names)  # Shuffle the list in place
+                random.shuffle(all_airport_names) 
 
-                # Select the top 3 (or however many you prefer) from the shuffled list
                 recommended_list = all_airport_names[:5]
                 print("Here are some recommended aircraft names to choose from:")
                 for recommend in recommended_list:
