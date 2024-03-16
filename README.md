@@ -52,7 +52,7 @@ To use the functionalities provided by the `TestDistanceGeo` class, follow these
    ```bash 
    python distance_function_test.py
    ```
-This command will run the 3 tests defined in the TestDistanceGeo class. If everything is set up correctly, you should see output indicating the execution time and a status of "OK" meaning that all tests passed successfully.
+This command will run the 3 tests defined in the TestDistanceGeo class. If everything is set up correctly, you should see output indicating the execution time and a status of "OK" meaning that all tests passed successfully. 
 
 ## Airplane Class
 
