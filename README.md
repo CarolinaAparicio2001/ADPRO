@@ -45,9 +45,9 @@ To use the functionalities provided by the `TestDistanceGeo` class, follow these
 
 2. Make sure you installed geopy and unittest before running.
 
-2. Open a terminal in Jupyter Lab. Ensure you navigate to the directory containing the two Python files mentioned above. If you are not already in the correct directory, you can change directories using the cd command.
+3. Open a terminal in Jupyter Lab. Ensure you navigate to the directory containing the two Python files mentioned above. If you are not already in the correct directory, you can change directories using the cd command.
 
-3. In the terminal, code "python distance_function_test.py". This command will run the 3 tests defined in the TestDistanceGeo class. If everything is set up correctly, you should see output indicating the execution time and a status of "OK" meaning that all tests passed successfully.
+4. In the terminal, code "python distance_function_test.py". This command will run the 3 tests defined in the TestDistanceGeo class. If everything is set up correctly, you should see output indicating the execution time and a status of "OK" meaning that all tests passed successfully.
 
 ## Airplane Class
 
@@ -112,4 +112,4 @@ The class is PEP8 compliant, using black and pylint.
 GPL-3.0 license
 
 ## Project Status
-In Progress
+Finished
