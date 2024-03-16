@@ -84,7 +84,7 @@ class Airplane:
                 )
                 self.routes_df = pd.read_csv(os.path.join(downloads_dir, "routes.csv"))
 
-    def merge_datasets(self) -> pd.DataFrame:
+    def merge_datasets(self):
         """
         Merges different datasets and cleans up unnecessary columns.
         """
@@ -158,7 +158,7 @@ class Airplane:
         Plot the locations of airports within a specified country on a map.
 
         Parameters:
-        - country (str): The name of the country for which airports are to be plotted.
+            country (str): The name of the country for which airports are to be plotted.
         """
         country_airports = self.merge_df[self.merge_df["Source country"] == country]
         if country_airports.empty:
@@ -217,8 +217,8 @@ class Airplane:
         Otherwise, it displays all flights from the airport on a global map.
 
         Parameters:
-        - code_airport (str): IATA code of the source airport.
-        - internal (bool): Flag for plotting only domestic flights; defaults to False.
+            code_airport (str): IATA code of the source airport.
+            internal (bool): Flag for plotting only domestic flights; defaults to False.
         """
 
         country_of_source = self.merge_df.loc[
@@ -294,8 +294,8 @@ class Airplane:
         Plots the most used airplane models based on the number of routes.
 
         Parameters:
-        - n (int): Number of airplane models to plot, defaults to 5.
-        - countries (list/str): Specific country or list of countries to consider; defaults to None.
+            n (int): Number of airplane models to plot, defaults to 5.
+            countries (list/str): Specific country or list of countries to consider; defaults to None.
         """
         if countries:
             if isinstance(countries, str):
@@ -431,6 +431,14 @@ class Airplane:
                     gpd.GeoDataFrame(geometry=[route]).plot(
                         ax=axis, color=color, linewidth=2
                     )
+
+            '''
+            This section compares the potential carbon emission reductions between short-haul flights and equivalent train rides.
+            Supposing that a domestic flight emits 246 grams per kilometer, calculate the total kilometer of short-haul flights times 246
+            Next, we consider the environmental impact of short-haul flights compared to train rides.
+            Research indicates that short-haul flights covering a distance of less than 500 km can produce three times more CO2 emissions than a train ride over the same distance.
+            Hence, to estimate the emissions from equivalent train rides, we divide the total emissions from short-haul flights by 3.
+            '''
             
             total_emissions_flight = total_short_haul_distance * 246
             
