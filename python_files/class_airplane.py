@@ -134,7 +134,7 @@ class Airplane:
             }
         )
         merge_df = merge_df.dropna(subset=["Source country", "Destination country"])
-        # Drop the columns that I dont need
+        
         merge_df.drop(
             columns=[
                 "IATA_y",
@@ -148,10 +148,8 @@ class Airplane:
             inplace=True,
         )
 
-        # Assign the resulting merge_df to the instance variable
+        
         self.merge_df = merge_df
-
-        # print("Merge DataFrame:\n", self.merge_df.head())
 
         return self.merge_df
 
@@ -326,9 +324,8 @@ class Airplane:
             cutoff_distance (float): Threshold in km to differentiate between short-haul and long-haul flights.
         """
 
-        # Ensure the distance column is available
         if "distance" not in self.merge_df.columns:
-            self.distance_analysis()  # Compute distances if not already done
+            self.distance_analysis()  
 
         if internal:
             internal_routes = self.merge_df[
@@ -380,7 +377,6 @@ class Airplane:
                         ax=axis, color=color, linewidth=2
                     )
 
-            # Annotate total information about short-haul flights
             plt.annotate(
                 f"Total short-haul flights: {short_haul_count}\nTotal short-haul distance: {total_short_haul_distance:.2f} km",
                 xy=(0.07, 1.2),
@@ -404,9 +400,6 @@ class Airplane:
             world = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
             _, axis = plt.subplots(figsize=(10, 10))
             world.plot(ax=axis, color="lightgrey")
-
-            # This section assumes that the plotting for non-internal (all routes) does not differentiate by distance
-            # Extend this logic if you wish to categorize all flights by distance as well.
 
             total_short_haul_distance = 0
             no_double_routes = set()
