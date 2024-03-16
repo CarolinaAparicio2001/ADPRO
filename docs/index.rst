@@ -10,7 +10,7 @@ Welcome to Project Icaras's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-    methods    
+    modules    
 
 Indices and tables
 ==================
