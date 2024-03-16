@@ -21,11 +21,19 @@ We will be using data from [International Air Transport Association](https://www
 Our repository is structured as follows:
 
 - In the main directory, you can find our showcase notebook ```showcase_notebook.ipynb```. It contains an analysis of the data and showcases our findings.
+- - `docs/`: Contains the documentation files generated with Sphinx:
+  - `class_airplane.rst`: Provides a detailed explanation of the `Airplane` class, outlining the methods for downloading and analyzing airplane data, including retrieving information on specific aircraft and airports.
+  - `conf.py`: This file contains key configurations essential for customizing Sphinx documentation's appearance and structure.
+  - `distance_airports.rst`: This document explains the distance_airports module, including its function to compute the geodesic distance between airports and its usage scenarios.
+  - `distance_function_test.rst`: Describes tests for verifying distance calculations in the `TestDistanceGeo` class, ensuring function accuracy and reliability.
+  - `index.rst`: The navigation page guides users to specific sections in the document.
+  - `make.bat`and `Makefile`: These scripts assist in generating documentation using Sphinx, accommodating various build options and environments.
+  - `modules.rst`: Compiled by Sphinx, this file lists all documented modules in the project, serving as a quick reference.
+- `flight_data/:` Contains our datasets
 - `python_files/`: Contains the python code files:
     - `class_airplane.py`: Python class `Airplane` with several methods was created. All the methods used belong to this class.
     - `distance_airports.py`: There is a function called `distance_geo` that calculates the geographical distance between two points using latitude and longitude coordinates. It works independently and has robust error handling, returning 0 in case of calculation failures.
     - `distance_function_test.py` : Python class `TestDistanceGeo` where is included the 3 unit tests for the function `distance_geo`from `distance_airports.py`.
-- `flight_data/:` Contains our datasets
 
 
 To use the functionalities provided by the `Airplane` class, follow these steps:
@@ -38,6 +46,14 @@ To use the functionalities provided by the `Airplane` class, follow these steps:
 
 4. For the LLM, to have access to OPENAI_API_KEY we had to use "import os" and we deleted before uploading to git. Maybe there is need to some adjustments before these codes starts working.
 
+5. To generate and view the project´s documentation ensure you have Sphinx installed. If not already installed, use pip:
+   ```python
+   pip install sphinx
+   ```
+6. To access the documentation, go to the `docs` folder and execute the command.
+   ```python
+   make html
+   ```
 
 To use the functionalities provided by the `TestDistanceGeo` class, follow these steps:
 
@@ -101,12 +117,14 @@ The class adheres to PEP8 standards, utilizing black and pylint for code formatt
    - Test distance from airports from different countries.
 
 
-
 ## Airplane Class
 The class is PEP8 compliant, using black and pylint.
 
 ## TestDistanceGeo Class
 The class is PEP8 compliant, using black and pylint.
+
+## Documentation
+For detailed documentation, please refer to the [Project Icaras Documentation](docs/_build/html/index.html)
 
 ## License
 GPL-3.0 license
