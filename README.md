@@ -70,16 +70,21 @@ To use the functionalities provided by the `Airplane` class, follow these steps:
     cd docs
     make html
    ```
-
+    
 To use the functionalities provided by the `TestDistanceGeo` class, follow these steps:
 
 1. Ensure that both `distance_airports.py` and `distance_function_test.py` files are located within the `python_files/`. These files contain the implementation of the distance calculation and the corresponding unit tests, respectively.
 
-2. Make sure you installed geopy and unittest before running.
-
-3. Open a terminal in Jupyter Lab. Ensure you navigate to the directory containing the two Python files mentioned above. If you are not already in the correct directory, you can change directories using the cd command.
-
-4. In the terminal, code "python distance_function_test.py". This command will run the 3 tests defined in the TestDistanceGeo class. If everything is set up correctly, you should see output indicating the execution time and a status of "OK" meaning that all tests passed successfully.
+2. Make sure you installed geopy before starting to test. In not already installed, use pip: 
+   ```bash
+   pip install geopy 
+   ```
+3. Open a terminal Jupyter Lab. Ensure you navigate to the directory containing the two Python files mentioned above. If you are not already in the correct directory, you can change directories using the cd command.
+4. In the terminal, code:
+   ```bash 
+   python distance_function_test.py
+   ```
+This command will run the 3 tests defined in the TestDistanceGeo class. If everything is set up correctly, you should see output indicating the execution time and a status of "OK" meaning that all tests passed successfully.
 
 
 ## Airplane Class
