@@ -4,7 +4,7 @@ Module: class_airplane
 Description: This module defines the Airplane class for downloading airplane data and performing analysis on it.
 """
 
-# standard libraries
+# Standard libraries
 import os
 from zipfile import ZipFile
 import random
@@ -152,6 +152,7 @@ class Airplane:
         self.merge_df = merge_df
 
         return self.merge_df
+        
 
     def plot_airports_in_country(self, country):
         """
