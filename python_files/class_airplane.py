@@ -465,7 +465,7 @@ class Airplane:
         """
         column_names = self.airplanes_df.columns
         print("Column names in airplanes_df:", column_names)
-        # Assuming 'Name' is the column containing aircraft models in self.airplane_df
+
         aircraft_models = self.airplanes_df["Name"].tolist()
         print("List of Aircraft Models:")
         for model in aircraft_models:
