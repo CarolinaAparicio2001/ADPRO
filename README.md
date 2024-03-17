@@ -20,12 +20,23 @@ We will be using data from [International Air Transport Association](https://www
 
 Our repository is structured as follows:
 
-- In the main directory, you can find our showcase notebook ```showcase_notebook.ipynb```. It contains an analysis of the data and showcases our findings.
+- In the main directory, you can find:
+    -  our showcase notebook ```showcase_notebook.ipynb```. It contains an analysis of the data and showcases our findings.
+    -  ```environment.yml```. The YAML file contains a list of all the essential dependencies required to run our project.
+    -  ```gitignore```. This file contains patterns for Git to ignore, specifically for Python projects. It excludes files like byte-compiled code, log files, and local configurations to maintain a clean repository.
+- `docs/`: Contains the documentation files generated with Sphinx:
+  - `class_airplane.rst`: Provides a detailed explanation of the `Airplane` class, outlining the methods for downloading and analyzing airplane data, including retrieving information on specific aircraft and airports.
+  - `conf.py`: This file contains key configurations essential for customizing Sphinx documentation's appearance and structure.
+  - `distance_airports.rst`: This document explains the distance_airports module, including its function to compute the geodesic distance between airports and its usage scenarios.
+  - `distance_function_test.rst`: Describes tests for verifying distance calculations in the `TestDistanceGeo` class, ensuring function accuracy and reliability.
+  - `index.rst`: The navigation page guides users to specific sections in the document.
+  - `make.bat`and `Makefile`: These scripts assist in generating documentation using Sphinx, accommodating various build options and environments.
+  - `modules.rst`: Compiled by Sphinx, this file lists all documented modules in the project, serving as a quick reference.
+- `flight_data/:` Contains our datasets
 - `python_files/`: Contains the python code files:
     - `class_airplane.py`: Python class `Airplane` with several methods was created. All the methods used belong to this class.
     - `distance_airports.py`: There is a function called `distance_geo` that calculates the geographical distance between two points using latitude and longitude coordinates. It works independently and has robust error handling, returning 0 in case of calculation failures.
     - `distance_function_test.py` : Python class `TestDistanceGeo` where is included the 3 unit tests for the function `distance_geo`from `distance_airports.py`.
-- `flight_data/:` Contains our datasets
 
 
 To use the functionalities provided by the `Airplane` class, follow these steps:
@@ -38,7 +49,28 @@ To use the functionalities provided by the `Airplane` class, follow these steps:
 
 4. For the LLM, to have access to OPENAI_API_KEY we had to use "import os" and we deleted before uploading to git. Maybe there is need to some adjustments before these codes starts working.
 
-
+5. Run the following command to create a new environment named `environment` using the provided `environment.yml`:
+   ```bash
+   conda env create -f environment.yml
+   ```
+6. List all available Conda environments to confirm that environment has been created successfully:
+   ```bash
+   conda info --envs
+   ```
+7. Once confirmed, activate the new environment with:
+   ```bash
+   conda activate environment
+   ```
+9. To generate and view the project´s documentation ensure you have Sphinx installed. If not already installed, use pip:
+   ```bash
+   pip install sphinx
+   ```
+10. To access the documentation, go to the `docs` folder and execute the command.
+   ```bash
+    cd docs
+    make html
+   ```
+    
 To use the functionalities provided by the `TestDistanceGeo` class, follow these steps:
 
 1. Ensure that both `distance_airports.py` and `distance_function_test.py` files are located within the `python_files/`. These files contain the implementation of the distance calculation and the corresponding unit tests, respectively.
@@ -52,7 +84,8 @@ To use the functionalities provided by the `TestDistanceGeo` class, follow these
    ```bash 
    python distance_function_test.py
    ```
-This command will run the 3 tests defined in the TestDistanceGeo class. If everything is set up correctly, you should see output indicating the execution time and a status of "OK" meaning that all tests passed successfully. 
+This command will run the 3 tests defined in the TestDistanceGeo class. If everything is set up correctly, you should see output indicating the execution time and a status of "OK" meaning that all tests passed successfully.
+
 
 ## Airplane Class
 
@@ -106,15 +139,17 @@ The class adheres to PEP8 standards, utilizing black and pylint for code formatt
    - Test distance from airports from different countries.
 
 
-
 ## Airplane Class
 The class is PEP8 compliant, using black and pylint.
+
 
 ## TestDistanceGeo Class
 The class is PEP8 compliant, using black and pylint.
 
+
 ## License
 GPL-3.0 license
 
+
 ## Project Status
-In Progress
+Finished
