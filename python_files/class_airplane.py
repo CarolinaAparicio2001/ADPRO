@@ -71,7 +71,7 @@ class Airplane:
                 self.routes_df = pd.read_csv(os.path.join(downloads_dir, "routes.csv"))
 
                 """
-                Loading data into DataFrames.
+                Loading data into DataFrames
                 """
                 self.airlines_df = pd.read_csv(
                     os.path.join(downloads_dir, "airlines.csv")
