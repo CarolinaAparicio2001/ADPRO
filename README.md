@@ -49,26 +49,26 @@ To use the functionalities provided by the `Airplane` class, follow these steps:
 
 4. For the LLM, to have access to OPENAI_API_KEY we had to use "import os" and we deleted before uploading to git. Maybe there is need to some adjustments before these codes starts working.
 
-5. Run the following command to create a new environment named `environment` using the provided `environment.yml`:
-   ```bash
+5. Run the following command to create a new environment named `airplane_05` using the provided `environment.yml`:
+   ```shell
    conda env create -f environment.yml
    ```
 6. List all available Conda environments to confirm that environment has been created successfully:
-   ```bash
+   ```shell
    conda info --envs
    ```
 7. Once confirmed, activate the new environment with:
-   ```bash
-   conda activate environment
+   ```shell
+   conda activate airplane_05
    ```
-9. To generate and view the project´s documentation ensure you have Sphinx installed. If not already installed, use pip:
-   ```bash
-   pip install sphinx
+9. To generate and view the project´s documentation ensure you have Sphinx installed. If not already installed, run the following on your environment:
+   ```shell
+   conda install sphinx sphinx_rtd_theme make
    ```
 10. To access the documentation, go to the `docs` folder and execute the command.
-   ```bash
+   ```shell
+    mkdir docs
     cd docs
-    make html
    ```
     
 To use the functionalities provided by the `TestDistanceGeo` class, follow these steps:
