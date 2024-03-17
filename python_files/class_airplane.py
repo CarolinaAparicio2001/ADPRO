@@ -26,12 +26,53 @@ from distance_airports import distance_geo
 
 class Airplane:
     """
-    A class to download airplane data and perform analysis on it.
+    A class to handle the downloading, merging, analysis, and visualization of airplane data.
+
+    Attributes:
+    -----------
+    airlines_df (DataFrame): Contains airline data.
+    airplanes_df (DataFrame): Contains airplanes data.
+    airports_df (DataFrame): Contains airports data.
+    routes_df (DataFrame): Contains routes data.
+    merge_df (DataFrame): Contains merged dataset for analysis.
+
+    Methods:
+    --------
+    download_data():
+        Downloads flight data from a specified URL and extracts it into the 'downloads' directory.
+
+    merge_datasets():
+        Merges airlines, airplanes, airports, and routes datasets into a single DataFrame.
+
+    plot_airports_in_country(country):
+        Plots the locations of airports within the specified country.
+
+    distance_analysis():
+        Calculates and plots the distribution of distances between source and destination airports.
+
+    plot_flights_by_code_airports(code_airport, internal=False):
+        Visualizes flight routes originating from a specific airport. Filters for domestic flights if 'internal' is True.
+
+    plot_most_used_airplane_models(n=5, countries=None):
+        Plots the top 'n' most frequently used airplane models based on the number of routes.
+
+    plot_flights_by_country(country, internal=False, cutoff_distance=500):
+        Plots flight routes for the specified country, differentiating between short-haul and long-haul flights based on 'cutoff_distance'.
+
+    aircrafts():
+        Lists aircraft models present in the dataset.
+
+    aircraft_info(aircraft_name):
+        Retrieves and prints detailed information for a specified aircraft model.
+
+    airport_info(airport_name):
+        Retrieves and prints detailed information for a specified airport.
     """
 
-
-class Airplane:
     def __init__(self):
+        """
+        Initializes the Airplane class with empty DataFrames for storing dataset information.
+        """
         self.airlines_df = pd.DataFrame()
         self.airplanes_df = pd.DataFrame()
         self.airports_df = pd.DataFrame()
@@ -42,6 +83,7 @@ class Airplane:
         """
         Download the flight data and save it to a folder called downloads.
         """
+
         downloads_dir = "downloads"
         if not os.path.exists(downloads_dir):
             os.makedirs(downloads_dir)
@@ -134,7 +176,7 @@ class Airplane:
             }
         )
         merge_df = merge_df.dropna(subset=["Source country", "Destination country"])
-        
+
         merge_df.drop(
             columns=[
                 "IATA_y",
@@ -148,19 +190,24 @@ class Airplane:
             inplace=True,
         )
 
-        
         self.merge_df = merge_df
 
         return self.merge_df
-        
 
     def plot_airports_in_country(self, country):
         """
         Plot the locations of airports within a specified country on a map.
 
         Parameters:
+        ---------------
             country (str): The name of the country for which airports are to be plotted.
+
+        Returns:
+        ---------------
+            None: This method implicitly displays a map plot or prints a message and does
+            not have a return statement.
         """
+
         country_airports = self.merge_df[self.merge_df["Source country"] == country]
         if country_airports.empty:
             print(f"No airports found in {country}.")
@@ -191,7 +238,16 @@ class Airplane:
     def distance_analysis(self):
         """
         Performs distance analysis between source and destination airports.
+
+        Parameters
+        ---------------
+            None: This method does not take any parameters.
+
+        Returns:
+        ---------------
+            distance_plot (ggplot object): Represents a histogram of distances.
         """
+
         self.merge_df["distance"] = self.merge_df.apply(
             lambda row: distance_geo(
                 row["latitude_source"],
@@ -213,13 +269,20 @@ class Airplane:
 
     def plot_flights_by_code_airports(self, code_airport, internal=False):
         """
-        Plots flight routes originating from a specified airport. If the 'internal' parameter
-        is set to True, it will display only domestic flights within the specified airport's country.
+        Plots flight routes originating from a specified airport.
+        If the 'internal' parameter is set to True, it will display only domestic
+        flights within the specified airport's country.
         Otherwise, it displays all flights from the airport on a global map.
 
         Parameters:
+        ---------------
             code_airport (str): IATA code of the source airport.
             internal (bool): Flag for plotting only domestic flights; defaults to False.
+
+        Returns:
+        ---------------
+            None: This method does not return a value. It displays the plot showing
+            flight routes.
         """
 
         country_of_source = self.merge_df.loc[
@@ -254,7 +317,6 @@ class Airplane:
 
         fig, axis = plt.subplots(figsize=(10, 10))
         if internal:
-
             country_plot = world[world["name"] == country_of_source]
             country_plot.plot(ax=axis, color="lightgrey")
 
@@ -262,7 +324,6 @@ class Airplane:
             axis.set_xlim(minx, maxx)
             axis.set_ylim(miny, maxy)
         else:
-
             world.plot(ax=axis, color="lightgrey")
             world[world["name"] == country_of_source].plot(ax=axis, color="lightblue")
 
@@ -295,9 +356,15 @@ class Airplane:
         Plots the most used airplane models based on the number of routes.
 
         Parameters:
+        ---------------
             n (int): Number of airplane models to plot, defaults to 5.
             countries (list/str): Specific country or list of countries to consider; defaults to None.
+
+        Returns:
+        ---------------
+            None. This method does not return any value. It displays the plot directly.
         """
+
         if countries:
             if isinstance(countries, str):
                 countries = [countries]
@@ -317,16 +384,24 @@ class Airplane:
 
     def plot_flights_by_country(self, country, internal=False, cutoff_distance=500):
         """
-        Plot the map flight routes between domestic and international flights from source to destination airports.
+        Plot the map flight routes between domestic and international flights
+        from source to destination airports.
 
         Parameters:
+        ---------------
             country (str): Name of the source country.
-            internal (bool): If the flight is internal or not. Being by default False.
-            cutoff_distance (float): Threshold in km to differentiate between short-haul and long-haul flights.
+            internal (bool): If the flight is internal or not.
+            Being by default False.
+            cutoff_distance (float): Threshold in km to differentiate
+            between short-haul and long-haul flights.
+
+        Returns:
+        ---------------
+            None. This method does not return any value but displays directly the plot.
         """
 
         if "distance" not in self.merge_df.columns:
-            self.distance_analysis()  
+            self.distance_analysis()
 
         if internal:
             internal_routes = self.merge_df[
@@ -433,16 +508,22 @@ class Airplane:
                         ax=axis, color=color, linewidth=2
                     )
 
-            '''
-            This section compares the potential carbon emission reductions between short-haul flights and equivalent train rides.
-            Supposing that a domestic flight emits 246 grams per kilometer, calculate the total kilometer of short-haul flights times 246
-            Next, we consider the environmental impact of short-haul flights compared to train rides.
-            Research indicates that short-haul flights covering a distance of less than 500 km can produce three times more CO2 emissions than a train ride over the same distance.
-            Hence, to estimate the emissions from equivalent train rides, we divide the total emissions from short-haul flights by 3.
-            '''
-            
+            """
+            This section compares the potential carbon emission reductions 
+            between short-haul flights and equivalent train rides.
+            Supposing that a domestic flight emits 246 grams per kilometer, 
+            calculate the total kilometer of short-haul flights times 246
+            Next, we consider the environmental impact of short-haul flights 
+            compared to train rides.
+            Research indicates that short-haul flights covering a 
+            distance of less than 500 km can produce three times more CO2 emissions 
+            than a train ride over the same distance.
+            Hence, to estimate the emissions from equivalent train rides, 
+            we divide the total emissions from short-haul flights by 3.
+            """
+
             total_emissions_flight = total_short_haul_distance * 246
-            
+
             total_emissions_train = total_emissions_flight / 3
 
             co2_reductions = (total_emissions_flight - total_emissions_train) / 1000
@@ -463,8 +544,10 @@ class Airplane:
         """
         Plot a list of aircraft models from the airplanes_df DataFrame.
 
-        This method prints the column names in airplanes_df and then prints a list of aircraft models.
+        This method prints the column names in airplanes_df and then
+        prints a list of aircraft models.
         """
+
         column_names = self.airplanes_df.columns
         print("Column names in airplanes_df:", column_names)
 
@@ -478,12 +561,19 @@ class Airplane:
         Plot the information about aircaft name.
 
         Parameters:
-            aircraft_name (str): The name of the aircraft for which information is to be retrieved.
+        ---------------
+            aircraft_name (str): The name of the aircraft for which
+            information is to be retrieved.
+
+        Returns:
+        ---------------
+            None. The method directly prints the retrieved information
+            or suggestions to the console.
         """
+
         aircraft_models = self.airplanes_df["Name"].tolist()
 
         if aircraft_name in aircraft_models:
-            
             query = f"Aircraft Information for {aircraft_name}:"
             query += f"\nName: {aircraft_name}"
             query += f"\nIATA code: {self.airplanes_df.loc[self.airplanes_df['Name'] == aircraft_name, 'IATA code'].iloc[0]}"
@@ -496,7 +586,6 @@ class Airplane:
             print(result.content)
 
         else:
-            
             close_matches = get_close_matches(
                 aircraft_name, aircraft_models, n=5, cutoff=0.3
             )
@@ -505,12 +594,10 @@ class Airplane:
                 for match in close_matches:
                     print(f"- {match}")
             else:
-                
                 print(f"No close matches found for '{aircraft_name}'.")
 
-          
                 all_aircraft_names = self.airplanes_df["Name"].tolist()
-                random.shuffle(all_aircraft_names) 
+                random.shuffle(all_aircraft_names)
 
                 recommended_list = all_aircraft_names[:5]
                 print("Here are some recommended aircraft names to choose from:")
@@ -522,13 +609,21 @@ class Airplane:
         Plot the information about airport name.
 
         Parameters:
-            airport_name (str): The name of the airport for which information is to be retrieved.
+        ---------------
+            airport_name (str): The name of the airport for which
+            information is to be retrieved.
+
+        Returns:
+        ---------------
+            None. The method directly prints the retrieved information
+            or suggestions to the console.
         """
+
         airport_models = self.merge_df["Name"].tolist()
 
         if airport_name in airport_models:
             print(f"Airport Information for {airport_name}:")
-          
+
             query = f"Provide details for the airport named {airport_name}. Include information such as Airport ID, Source airport, City, Latitude, and Longitude."
 
             llm = ChatOpenAI(temperature=0.1)
@@ -537,7 +632,6 @@ class Airplane:
 
             print(result.content)
         else:
- 
             close_matches = get_close_matches(
                 airport_name, airport_models, n=5, cutoff=0.3
             )
@@ -546,11 +640,10 @@ class Airplane:
                 for match in close_matches:
                     print(f"- {match}")
             else:
-                
                 print(f"No close matches found for '{airport_name}'.")
 
                 all_airport_names = self.merge_df["Name"].tolist()
-                random.shuffle(all_airport_names) 
+                random.shuffle(all_airport_names)
 
                 recommended_list = all_airport_names[:5]
                 print("Here are some recommended aircraft names to choose from:")
